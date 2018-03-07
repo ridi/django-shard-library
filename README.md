@@ -57,4 +57,5 @@ class ShardModel(ShardMixin, models.Model):
 ## TODO
 
 - 모든 샤드에 공유되는 Static데이터기능 구현
+- Example App 작성
 - migration
