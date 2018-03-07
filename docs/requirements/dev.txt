@@ -1,7 +1,4 @@
 -r base.txt
+-r test.txt
 
-pylint==1.8.1
-flake8==3.5.0
-
-django-fake-model==0.1.4
-django-dynamic-fixture==2.0.0
+twine==1.9.1
