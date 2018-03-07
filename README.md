@@ -59,4 +59,5 @@ class ShardModel(ShardMixin, models.Model):
 - 모든 샤드에 공유되는 Static데이터기능 구현
 - Example App 작성
 - 문서화
+- Travis
 - migration
