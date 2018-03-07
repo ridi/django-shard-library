@@ -7,11 +7,7 @@
 ## Usage
 #### Setup
 ``` python
-# shard = instance
-# logical_shard = database
-# replica = code상 shard_count
-
-DATABASES = generate_databases(
+DATABASES = ConfigHelper.database_configs(
     unshard = {
         'default': {
             'master': 'mysql://user:pwd@host/metadata',
@@ -37,10 +33,6 @@ DATABASES = generate_databases(
         },
     },
 )
-
-SHARD_REPLICA_COUNT_SETTING = {
-    'SHARD_NAME': 1024, # default: 1024
-}
 
 ```
 
