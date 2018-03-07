@@ -1,0 +1,12 @@
+[flake8]
+
+# F401  imported but unused
+
+ignore=F401
+
+max-line-length=140
+
+exclude =
+    ./docs
+    ./venv
+    migrations

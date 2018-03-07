@@ -1,0 +1,81 @@
+
+@startuml
+
+package django {
+    node settings {
+        [DATABASES]
+        [ROUTERS]
+    }
+    [models.Model]
+
+    [scripts]
+}
+
+package lib-shard {
+    [config]
+
+    node utils {
+        [execute]
+        [database]
+        [shard]
+        [shard_key]
+    }
+
+    node managers {
+        [ShardManager]
+    }
+    node queryset {
+        [ShardQueryset]
+    }
+
+    node routers {
+        [ReplicationRouter]
+        [ShardRouter]
+    }
+
+    node mixins {
+        [ShardMixin]
+    }
+
+    node strategy {
+        node id_generation {
+            [TableStrategy]
+        }
+        node routing {
+            [RandomStrategy]
+        }
+    }
+
+    node fields {
+        [TableStrategyPkField]
+    }
+
+    node models {
+        [TableStrategyModel]
+    }
+}
+
+'django 연결
+[DATABASES] --> [config]
+[ROUTERS] --> [ShardRouter]
+[scripts] --> [execute]
+
+[models.Model] --> [ShardMixin]
+[models.Model] --> [ShardManager]
+
+'lib
+[ShardRouter] --> [ReplicationRouter]
+[ShardRouter] --> [RandomStrategy]
+[RandomStrategy] --> [shard]
+[shard] --> [database]
+[shard] --> [shard_key]
+[execute] --> [database]
+
+[ShardRouter] --> [models.Model]
+[ShardManager] --> [ShardQueryset]
+[ShardQueryset] --> [shard_key]
+
+[TableStrategyPkField] --> [TableStrategy]
+[TableStrategy] --> [TableStrategyModel]
+
+@enduml
