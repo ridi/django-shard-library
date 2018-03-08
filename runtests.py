@@ -38,7 +38,7 @@ settings.configure(
         'django.contrib.sites',
         'tests',
     ],
-    DATABASE_ROUTERS = [
+    DATABASE_ROUTERS=[
         'shard.routers.specific.SpecificRouter', 'shard.routers.shard.ShardRouter',
     ]
 )
