@@ -9,7 +9,7 @@ with open('requirements/base.txt') as f:
 setup(
     name='django-shard-library',
     version=version,
-    url='https://github.com/ridi/djang-shard-library',
+    url='https://github.com/ridi/django-shard-library',
     license='BSD',
     description='Django Shard Library',
     keywords=['django', 'shard', 'ridi', 'ridibooks'],
