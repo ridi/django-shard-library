@@ -61,3 +61,7 @@ class ShardModel(ShardMixin, models.Model):
 - 문서화
 - Travis
 - migration
+
+
+## Prior art
+- https://github.com/JBKahn/django-sharding
