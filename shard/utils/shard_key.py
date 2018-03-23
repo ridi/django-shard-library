@@ -3,7 +3,7 @@ from django.conf import settings
 from shard.exceptions import NotShardingModelException, RequireShardKeyException
 from shard.mixins import ShardMixin
 
-__all__ = ('get_shard_key_from_kwargs', 'get_shard_key_from_instance', )
+__all__ = ('get_shard_key_from_kwargs', 'get_shard_key_from_instance', 'mod_shard_key_by_replica_count', )
 
 SHARD_REPLICA_COUNT_SETTING = 'SHARD_REPLICA_COUNT_SETTING'
 DEFAULT_REPLICA_COUNT = 1024
@@ -15,11 +15,15 @@ def get_shard_key_from_kwargs(model, **kwargs) -> int:
     if model.shard_key_name not in kwargs:
         raise RequireShardKeyException()
 
-    return _calc_shard_key(kwargs[model.shard_key_name], model.shard_group)
+    return mod_shard_key_by_replica_count(kwargs[model.shard_key_name], model.shard_group)
 
 
 def get_shard_key_from_instance(instance: ShardMixin) -> int:
-    return _calc_shard_key(instance.get_shard_key(), instance.shard_group)
+    return mod_shard_key_by_replica_count(instance.get_shard_key(), instance.shard_group)
+
+
+def mod_shard_key_by_replica_count(shard_key: int, shard_group: str) -> int:
+    return _calc_shard_key(shard_key, shard_group)
 
 
 def _validate_shard_model(model):
