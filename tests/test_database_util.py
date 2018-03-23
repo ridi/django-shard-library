@@ -15,7 +15,7 @@ mock = MagicMock(return_value=ConfigHelper.database_configs(
     },
     shard={
         'PRODUCT_GROUP': {
-            'options': {
+            'shard_options': {
                 'database_name': 'product',
                 'logical_count': 4,
             },
@@ -31,7 +31,7 @@ mock = MagicMock(return_value=ConfigHelper.database_configs(
             ],
         },
         'PREPARE_PRODUCT_GROUP': {
-            'options': {
+            'shard_options': {
                 'database_name': 'prepare_product',
                 'logical_count': 2,
             },
