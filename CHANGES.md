@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.0.2 (Mar 23th 2018)
+------------------
+- Change config structure
+  - Support db_options
+
+
 0.0.1 (Mar 7th 2018)
 ------------------
 
