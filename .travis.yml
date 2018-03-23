@@ -1,0 +1,24 @@
+language: python
+python:
+  - '3.6'
+
+stages:
+  - test
+  - name: deploy
+    if: "(tag IS present) AND (repo = ridi/django-shard-library)"
+
+jobs:
+  include:
+  - stage: test
+    before_script: make install-dev
+    script: make test
+  - stage: deploy
+    script: skip
+    deploy:
+      provider: pypi
+      user: junglekim
+      password:
+        secure: Eyt7IW/73GS1C+/7ncQSj8AdCpwyPs3jNztKYwzWL0QyPiEOl/tdvVLDSxK6M+472aOMdld9j3Dn/2Lg2oZk7/0/vnv1iRE3pBB+ps80AV0LoRXhUcyo07TVuMLnmsDgCnAZPc4TxEIgVohkT80J86s7yG8/F8liM/xIrSSO1+eaCa5ljq4heE+rwBusm7OY9ppszgNbNmDQs+Ao9rb341Bv3fyh/fuMztji38db9ZBZpkOQf95uIQH3AIV5/+Y9tCZWnf5G5JGE58yasUlAJpQMT2Vyls0qUULEjI4bz5AHWhtVOEGuiyS/z7JRqbNGqCgDMxF8TfRYoDy64FBMYay7qyGKqGe8xlfz+Gx0pdZHzPOfhhEo9fAXCzjJatja2Iqo/IzsIYUT50jgi2FmyktFGAjLeAO8eGmpjPvRa5e7NcEjVq++d7qPtZkkVx1Flj7yOVHbdWigWKryx+9bP+uXcxC12fmq81DJmsC53pqCEgxJAOZrz87yKyG2jIiNnOWnCrlO7mjjG7nSoZLt2FZrlFIH5gDTDk73kVaP+mFHyQ6/9Y6L2ZbFEj/Qwaizh1Nh6/B4A4CM/HNCqTzWul6ga3ojouxUl9YqaSfY4gFvL9acP2Foh+COzza6674uDrIigCqpk91BeacjGLFGWh3Fvid8LdP3GW45AfSaogc=
+      on:
+        repo: ridi/django-shard-library
+        tags: true

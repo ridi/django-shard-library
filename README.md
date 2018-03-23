@@ -1,5 +1,6 @@
 
 # Django-Shard-Library
+[![Build Status](https://travis-ci.org/ridi/django-shard-library.svg?branch=master)](https://travis-ci.org/ridi/django-shard-library)
 
 ## Introduction
 - 장고 ORM에서 샤드기능을 지원하기 위한 라이브러리 입니다.
@@ -15,14 +16,18 @@ DATABASES = ConfigHelper.database_configs(
     unshard = {
         'default': {
             'master': 'mysql://user:pwd@host/metadata',
-            'slaves': ['mysql://user:pwd@host/metadata', ]
+            'slaves': ['mysql://user:pwd@host/metadata?sql_mode=STRICT_TRANS_TABLE&charset=utf8', ]
         },
     },
     shard = {
         'SHARD_NAME': {
-            'options': {
+            'shard_options': {
                 'database_name': 'product',
                 'logical_count': 4,
+            },
+            'db_options': {  # Optional
+                'sql_mode': 'STRICT_TRANS_TABLE',
+                'charset': 'utf8',
             },
             'shards': [
                 {

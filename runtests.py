@@ -17,7 +17,7 @@ settings.configure(
         },
         shard={
             'product_shard': {
-                'options': {
+                'shard_options': {
                     'database_name': 'product',
                     'logical_count': 2,
                 },
