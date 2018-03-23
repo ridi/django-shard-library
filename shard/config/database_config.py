@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Optional, Tuple, Dict, List
 
 from dj_database_url import config
@@ -8,7 +9,7 @@ from shard.exceptions import RequireMasterConfigException
 __all__ = ('make_shard_configuration', 'make_replication_configuration', )
 
 
-def make_shard_configuration(shard_group: str, shard_options: Dict, shards: List) -> Dict:
+def make_shard_configuration(shard_group: str, shard_options: Dict, shards: List, db_options: Optional[Dict]=None) -> Dict:
     configuration = {}
     database_name = shard_options['database_name']
     logical_count_per_shard = _get_logical_count_per_shard(logical_count=shard_options['logical_count'], shard_count=len(shards))
@@ -18,9 +19,13 @@ def make_shard_configuration(shard_group: str, shard_options: Dict, shards: List
         for logical_index in range(start, end):
             shard_name = _make_shard_name(shard_group=shard_group, shard_index=index, logical_index=logical_index)
             replication_config = {
-                'master': _make_shard_database_url(origin=shard_config['master'], database_name=database_name, logical_index=logical_index),
+                'master': _make_shard_database_url(
+                    origin=shard_config['master'], database_name=database_name, logical_index=logical_index, db_options=db_options
+                ),
                 'slaves': [
-                    _make_shard_database_url(origin=slave_database_url, database_name=database_name, logical_index=logical_index)
+                    _make_shard_database_url(
+                        origin=slave_database_url, database_name=database_name, logical_index=logical_index, db_options=db_options
+                    )
                     for slave_database_url in shard_config.get('slaves', [])
                 ],
             }
@@ -75,12 +80,15 @@ def _get_logical_range(shard_index: int, logical_count_per_shard: int) -> Tuple[
     return start, end
 
 
-def _make_shard_database_url(origin: str, database_name: str, logical_index: int) -> str:
+def _make_shard_database_url(origin: str, database_name: str, logical_index: int, db_options: Optional[Dict]=None) -> str:
     if origin == 'sqlite://:memory:':
         return origin
 
     database_name = '%s_%d' % (database_name, logical_index)
     database_url = '%s%s' % (origin, database_name)
+
+    if db_options:
+        database_url = database_url + '?' + urllib.parse.urlencode(db_options)
 
     return database_url
 
