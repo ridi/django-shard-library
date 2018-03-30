@@ -1,5 +1,10 @@
 Changelog
 =========
+=========
+0.0.4 (Mar 30th 2018)
+------------------
+- Test Travis Deploy
+
 0.0.3 (Mar 23th 2018)
 ------------------
 - Change logic for calculate shard_key
