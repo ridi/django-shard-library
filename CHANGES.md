@@ -1,6 +1,5 @@
 Changelog
 =========
-=========
 0.0.4 (Mar 30th 2018)
 ------------------
 - Test Travis Deploy
