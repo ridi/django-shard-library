@@ -15,7 +15,21 @@ SETTINGS_DICT = {
             },
         },
         shard={
-            'product_shard': {
+            'shard_a': {
+                'shard_options': {
+                    'database_name': 'product',
+                    'logical_count': 2,
+                },
+                'shards': [
+                    {
+                        'master': 'sqlite://:memory:',
+                    },
+                    {
+                        'master': 'sqlite://:memory:',
+                    },
+                ]
+            },
+            'shard_b': {
                 'shard_options': {
                     'database_name': 'product',
                     'logical_count': 2,

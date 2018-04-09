@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.test import TestCase
 from django_dynamic_fixture import G
 
@@ -33,7 +32,7 @@ class ShardRouterTestCase(TestCase):
         self.assertNotEqual(write_db1, write_db2)
 
     def test_db_for_write_with_normal_object(self):
-        obj1 = G(NormalModel)
+        obj1 = G(NormalModel, normal_parent=None, shard_parent=None, static_all=None)
         write_db1 = self.router.db_for_write(model=obj1.__class__, hints={'instance': obj1})
 
         self.assertIsNone(write_db1)
