@@ -6,7 +6,7 @@ def memorize(func: Callable):
 
     def _decorator(*args, clear: bool=False, **kwargs):
         key = func.__name__ + str(args) + str(kwargs)
-        if key not in _cache or clear:
+        if clear or key not in _cache:
             _cache[key] = func(*args, **kwargs)
         return _cache[key]
 
