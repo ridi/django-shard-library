@@ -1,5 +1,5 @@
-from shard_static.utils.lock.base import LockManager
+from shard_static.utils.lock.base import LockHelper
 
 
-class DatabaseLockManager(LockManager):
+class DatabaseLockHelper(LockHelper):
     pass
