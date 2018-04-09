@@ -10,6 +10,9 @@ class BaseRouter:
     def db_for_write(self, model, **hints):
         raise NotImplementedError
 
+    def allow_relation(self, obj1, obj2, **hints):
+        raise NotImplementedError
+
 
 class BaseReplicationRouter(BaseRouter):
     _strategy = RandomReadStrategy
@@ -24,6 +27,9 @@ class BaseReplicationRouter(BaseRouter):
 
     def db_for_write(self, model, **hints):
         return self._get_master_database(model=model, **hints)
+
+    def allow_relation(self, obj1, obj2, **hints):
+        raise NotImplementedError
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
         raise NotImplementedError

@@ -1,5 +1,6 @@
 from django.db import models
 
+from shard.constants import ALL_SHARD_GROUP
 from shard.exceptions import StrategyNotImplementException, RequireSpecificDatabaseException
 
 __all__ = ('StrategyPkMixin', 'SpecificDatabaseMixin', 'ShardMixin', )
@@ -52,3 +53,5 @@ class ShardMixin:
 
 class ShardStaticMixin:
     diffusible = True
+
+    shard_group = ALL_SHARD_GROUP
