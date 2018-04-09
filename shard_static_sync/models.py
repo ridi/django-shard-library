@@ -13,4 +13,4 @@ class StaticSyncStatus(ShardStaticMixin, models.Model):
     diffusible = False
 
     class Meta:
-        db_table = 'shard_sync_status'
+        db_table = 'static_sync_status'
