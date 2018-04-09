@@ -48,3 +48,7 @@ class ShardMixin:
 
     def get_shard_key(self):
         return getattr(self, self.shard_key_name)
+
+
+class ShardStaticMixin:
+    diffusible = True
