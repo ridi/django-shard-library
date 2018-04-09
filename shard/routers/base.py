@@ -1,5 +1,7 @@
 from typing import Optional
 
+from django.conf import settings
+
 from shard.strategy.routing.random import RandomReadStrategy
 
 
@@ -11,6 +13,9 @@ class BaseRouter:
         raise NotImplementedError
 
     def allow_relation(self, obj1, obj2, **hints):
+        raise NotImplementedError
+
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
         raise NotImplementedError
 
 
@@ -29,7 +34,21 @@ class BaseReplicationRouter(BaseRouter):
         return self._get_master_database(model=model, **hints)
 
     def allow_relation(self, obj1, obj2, **hints):
-        raise NotImplementedError
+        obj1_db = self._get_master_database(model=obj1.__class__, instance=obj1)
+        obj2_db = self._get_master_database(model=obj2.__class__, instance=obj2)
+
+        # If variable is none, has not opinion for allow_relation.
+        if obj1_db is None or obj2_db is None:
+            return None
+
+        return obj1_db == obj2_db
+
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
+        # If db is slave, return false
+        if settings.DATABASES[db].get('PRIMARY', None):
+            return False
+
+        return None
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
         raise NotImplementedError
