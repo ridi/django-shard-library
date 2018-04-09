@@ -1,8 +1,7 @@
-import django
 import sys
 
+import django
 from django.conf import settings
-from django.test.utils import get_runner
 
 from shard.config.helper import ConfigHelper
 
@@ -44,24 +43,13 @@ SETTINGS_DICT = {
 }
 
 
-def run_tests(*test_args):
+def run_command(*args):
     settings.configure(**SETTINGS_DICT)
     django.setup()
 
-    if not test_args:
-        test_args = ['tests']
-
-    # Run tests
-    TestRunner = get_runner(settings)
-    test_runner = TestRunner()
-
-    failures = test_runner.run_tests(test_args, interactive=False)
-
-    if failures:
-        sys.exit(bool(failures))
-
-    sys.exit(0)
+    from django.core.management import execute_from_command_line
+    execute_from_command_line(args)
 
 
 if __name__ == '__main__':
-    run_tests(*sys.argv[1:])
+    run_command(*sys.argv[:])
