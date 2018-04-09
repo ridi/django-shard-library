@@ -14,14 +14,14 @@ class FakeModel(f.FakeModel, ShardMixin):
 
     objects = ShardManager()
 
-    shard_group = 'product_shard'
+    shard_group = 'shard_a'
     shard_key_name = 'user_id'
 
 
 @FakeModel.fake_me
 class QuerysetTestCase(TestCase):
     def setUp(self):
-        self.shard_group = 'product_shard'
+        self.shard_group = 'shard_a'
 
     def test_quertset(self):
         qs_one = FakeModel.objects.filter(user_id=1)
