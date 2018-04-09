@@ -12,12 +12,13 @@ __all__ = ('make_shard_configuration', 'make_replication_configuration', )
 def make_shard_configuration(shard_group: str, shard_options: Dict, shards: List, db_options: Optional[Dict]=None) -> Dict:
     configuration = {}
     database_name = shard_options['database_name']
-    logical_count_per_shard = _get_logical_count_per_shard(logical_count=shard_options['logical_count'], shard_count=len(shards))
+    shard_count = len(shards)
+    logical_count_per_shard = _get_logical_count_per_shard(logical_count=shard_options['logical_count'], shard_count=shard_count)
 
     for index, shard_config in enumerate(shards):
         start, end = _get_logical_range(index, logical_count_per_shard)
         for logical_index in range(start, end):
-            shard_name = _make_shard_name(shard_group=shard_group, shard_index=index, logical_index=logical_index)
+            shard_name = _make_shard_name(shard_group=shard_group, shard_count=shard_count, shard_index=index, logical_index=logical_index)
             replication_config = {
                 'master': _make_shard_database_url(
                     origin=shard_config['master'], database_name=database_name, logical_index=logical_index, db_options=db_options
@@ -93,5 +94,5 @@ def _make_shard_database_url(origin: str, database_name: str, logical_index: int
     return database_url
 
 
-def _make_shard_name(shard_group: str, shard_index: int, logical_index: int) -> str:
-    return '%s_%d_%d' % (shard_group, shard_index, logical_index)
+def _make_shard_name(shard_group: str, shard_count: int, shard_index: int, logical_index: int) -> str:
+    return '%s_%d%d_%d' % (shard_group, shard_count, shard_index, logical_index)
