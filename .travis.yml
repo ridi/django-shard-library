@@ -17,8 +17,9 @@ jobs:
       - make install-dev
       - mysql -u root -e "CREATE USER 'admin'@'127.0.0.1' IDENTIFIED BY 'test';"
       - mysql -u root -e "GRANT ALL ON *.* TO 'admin'@'localhost';"
-    script: make test
-    script: make lint
+    script:
+      - make test
+      - make lint
   - stage: deploy
     script: skip
     deploy:
