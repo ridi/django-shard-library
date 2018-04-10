@@ -2,6 +2,9 @@ language: python
 python:
   - '3.6'
 
+services:
+  - mysql
+
 stages:
   - test
   - name: deploy
@@ -10,8 +13,12 @@ stages:
 jobs:
   include:
   - stage: test
-    before_script: make install-dev
+    before_script:
+      - make install-dev
+      - mysql -u root -e "CREATE USER 'admin'@'127.0.0.1' IDENTIFIED BY 'test';"
+      - mysql -u root -e "GRANT ALL ON *.* TO 'admin'@'localhost';"
     script: make test
+    script: make lint
   - stage: deploy
     script: skip
     deploy:
