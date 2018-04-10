@@ -16,11 +16,8 @@ class ShardRouter(BaseReplicationRouter):
         if super_allow_relation is not None:
             return super_allow_relation
 
-        if (issubclass(obj1, ShardMixin) and issubclass(obj2, ShardStaticMixin)) or \
-                (issubclass(obj1, ShardStaticMixin) and issubclass(obj2, ShardMixin)):
-            return obj1.shard_group == obj2.shard_group or \
-                   obj1.shard_group == ALL_SHARD_GROUP or \
-                   obj2.shard_group == ALL_SHARD_GROUP
+        if issubclass(obj1, (ShardMixin, ShardStaticMixin)) and issubclass(obj2, (ShardMixin, ShardStaticMixin)):
+            return obj1.shard_group == obj2.shard_group or obj1.shard_group == ALL_SHARD_GROUP or obj2.shard_group == ALL_SHARD_GROUP
 
         if issubclass(obj1, ShardStaticMixin):
             return obj1.diffusible
