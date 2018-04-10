@@ -14,6 +14,21 @@ lint:
 test:
 	python runtests.py
 
+# Prepare to test
+run-test-db:
+	make up-test-db
+	sh docker/wait_for_it.sh 'mysqladmin ping -h 127.0.0.1 -u root -proot' 'make test-migration'
+
+stop-test-db:
+	@docker-compose -f docker/docker-compose-test-db.yml down
+
+up-test-db:
+	@docker-compose -f docker/docker-compose-test-db.yml up -d
+
+test-migration:
+	@python3.6 runcommand.py migrate
+
+
 # Release
 dist:
 	rm -rf ./dist
