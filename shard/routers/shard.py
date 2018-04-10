@@ -16,13 +16,13 @@ class ShardRouter(BaseReplicationRouter):
         if super_allow_relation is not None:
             return super_allow_relation
 
-        if issubclass(obj1, (ShardMixin, ShardStaticMixin)) and issubclass(obj2, (ShardMixin, ShardStaticMixin)):
+        if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
             return obj1.shard_group == obj2.shard_group or obj1.shard_group == ALL_SHARD_GROUP or obj2.shard_group == ALL_SHARD_GROUP
 
-        if issubclass(obj1, ShardStaticMixin):
+        if isinstance(obj1, ShardStaticMixin):
             return obj1.diffusible
 
-        if issubclass(obj2, ShardStaticMixin):
+        if isinstance(obj2, ShardStaticMixin):
             return obj2.diffusible
 
         return None
@@ -45,19 +45,23 @@ class ShardRouter(BaseReplicationRouter):
             app = apps.get_app_config(app_label)
             model = app.get_model(model_name)
 
-        if not issubclass(model, ShardMixin) and not issubclass(model, ShardStaticMixin):
-            if settings.DATABASES[db].get('SHARD_GROUP', None):
+        shard_group_for_db = settings.DATABASES[db].get('SHARD_GROUP', None)
+        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
+            if shard_group_for_db:
                 return False
             return None
 
-        if model.shard_group == ALL_SHARD_GROUP:
-            if db == 'default' or settings.DATABASES[db].get('SHARD_GROUP', None):
+        if issubclass(model, ShardStaticMixin):
+            if model.shard_group == ALL_SHARD_GROUP:
+                if db == 'default' or shard_group_for_db:
+                    return True
+            elif model.diffusible and db == 'default':
                 return True
 
-        if not settings.DATABASES[db].get('SHARD_GROUP', None):
+        if not shard_group_for_db:
             return False
 
-        return settings.DATABASES[db]['SHARD_GROUP'] == model.shard_group
+        return shard_group_for_db == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
         if not issubclass(model, ShardMixin):
