@@ -52,7 +52,3 @@ class TestIds(TableStrategyModel):
 
 class IdGenerateTestModel(models.Model):
     id = TableStrategyPkField(source_model='tests.TestIds', primary_key=True)
-
-
-class UUIDTestModel(models.Model):
-    id = UUID4StrategyPkField(primary_key=True, max_length=32, verbose_name='UUID Pk field')
