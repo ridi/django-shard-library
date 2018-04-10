@@ -20,9 +20,9 @@ class ShardRouterTestCase(TestCase):
         self.router = ShardRouter()
 
     def test_db_for_write_with_shard_object(self):
-        obj1 = G(ShardModelA, user_id=1)
-        obj2 = G(ShardModelA, user_id=2)
-        obj3 = G(ShardModelA, user_id=3)
+        obj1 = G(ShardModelA, user_id=1, parent=None, static_same=None, static_all=None, static_other=None)
+        obj2 = G(ShardModelA, user_id=2, parent=None, static_same=None, static_all=None, static_other=None)
+        obj3 = G(ShardModelA, user_id=3, parent=None, static_same=None, static_all=None, static_other=None)
 
         write_db1 = self.router.db_for_write(model=obj1.__class__, instance=obj1)
         write_db2 = self.router.db_for_write(model=obj2.__class__, instance=obj2)
