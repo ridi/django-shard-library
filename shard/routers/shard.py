@@ -3,7 +3,7 @@ from typing import Optional
 from django.apps import apps
 from django.conf import settings
 
-from shard.constants import ALL_SHARD_GROUP
+from shard.constants import ALL_SHARD_GROUP, DEFAULT_DATABASE
 from shard.mixins import ShardMixin, ShardStaticMixin
 
 from shard.routers.base import BaseReplicationRouter
@@ -52,14 +52,10 @@ class ShardRouter(BaseReplicationRouter):
             return None
 
         if issubclass(model, ShardStaticMixin):
-            if model.shard_group == ALL_SHARD_GROUP:
-                if db == 'default' or shard_group_for_db:
-                    return True
-            elif model.diffusible and db == 'default':
+            if model.shard_group == ALL_SHARD_GROUP and (db == DEFAULT_DATABASE or shard_group_for_db):
                 return True
-
-        if not shard_group_for_db:
-            return False
+            elif model.diffusible and db == DEFAULT_DATABASE:
+                return True
 
         return shard_group_for_db == model.shard_group
 
