@@ -21,7 +21,12 @@ class UUID4StrategyPkField(StrategyPkMixin, models.CharField):
     def __init__(self, *args, **kwargs):
         from shard.strategy.id_generation.uuid import UUIDStrategy
         kwargs['strategy'] = UUIDStrategy()
-        kwargs['null'] = True  # null False면 default가 empty string이 되어서 get_pk_value_on_save가 호출이 안됨
+
+        # If null is false, field's default value is empty string.
+        # So, model not call get_pk_value_on_save
+        # If you will use this field, give up using migrations.
+        # Crash django when using migrations, because django not supported nullable pk.
+        kwargs['null'] = True
         super().__init__(*args, **kwargs)
 
 
