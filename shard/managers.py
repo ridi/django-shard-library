@@ -19,6 +19,17 @@ def _wrap(func_name):
     return wrapped
 
 
+def _static_wrap(func_name):
+    def wrapped(self, *args, **kwargs):
+        if not self.model.diffusible:
+            raise NotExistsOriginalDataException()
+
+        return getattr(self.get_queryset(), func_name)(*args, **kwargs)
+
+    wrapped.__name__ = func_name
+    return wrapped
+
+
 class BaseShardManager(Manager):
     def shard(self, shard_key):
         _shard_key = mod_shard_key_by_replica_count(shard_key, self.model.shard_group)
@@ -31,11 +42,11 @@ class BaseShardManager(Manager):
 
 
 class ShardStaticManager(BaseShardManager):
-    def get_queryset(self, shard_key=None):
-        if not self.model.diffusible and shard_key is None:
-            raise NotExistsOriginalDataException()
-
-        return super().get_queryset(shard_key=shard_key)
+    filter = _static_wrap('filter')
+    get = _static_wrap('get')
+    create = _static_wrap('create')
+    get_or_create = _static_wrap('get_or_create')
+    update_or_create = _static_wrap('update_or_create')
 
 
 class ShardManager(BaseShardManager):
