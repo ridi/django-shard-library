@@ -53,11 +53,14 @@ class ShardRouter(BaseReplicationRouter):
                 return False
             return None
 
+        if model.shard_group == ALL_SHARD_GROUP:
+            if db == 'default' or settings.DATABASES[db].get('SHARD_GROUP', None):
+                return True
+
         if not settings.DATABASES[db].get('SHARD_GROUP', None):
             return False
 
-        return settings.DATABASES[db]['SHARD_GROUP'] == model.shard_group or \
-               model.shard_group == ALL_SHARD_GROUP
+        return settings.DATABASES[db]['SHARD_GROUP'] == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
         if not issubclass(model, ShardMixin):
