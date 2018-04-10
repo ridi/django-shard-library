@@ -1,6 +1,6 @@
 from django.db import models
 
-from shard.fields import TableStrategyPkField, UUID4StrategyPkField
+from shard.fields import TableStrategyPkField
 from shard.managers import ShardManager
 from shard.mixins import ShardStaticMixin, ShardMixin
 from shard.models import TableStrategyModel
