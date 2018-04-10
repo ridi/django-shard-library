@@ -19,7 +19,7 @@ def _wrap(func_name):
     return wrapped
 
 
-def _static_wrap(func_name):
+def _wrap_for_static(func_name):
     def wrapped(self, *args, **kwargs):
         if not self.model.diffusible:
             raise NotExistsOriginalDataException()
@@ -42,11 +42,11 @@ class BaseShardManager(Manager):
 
 
 class ShardStaticManager(BaseShardManager):
-    filter = _static_wrap('filter')
-    get = _static_wrap('get')
-    create = _static_wrap('create')
-    get_or_create = _static_wrap('get_or_create')
-    update_or_create = _static_wrap('update_or_create')
+    filter = _wrap_for_static('filter')
+    get = _wrap_for_static('get')
+    create = _wrap_for_static('create')
+    get_or_create = _wrap_for_static('get_or_create')
+    update_or_create = _wrap_for_static('update_or_create')
 
 
 class ShardManager(BaseShardManager):
