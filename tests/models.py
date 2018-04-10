@@ -23,7 +23,6 @@ class ShardModelA(ShardMixin, models.Model):
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     static_same = models.ForeignKey(ShardStaticA, null=True, on_delete=models.CASCADE)
     static_all = models.ForeignKey(ShardStaticAll, null=True, on_delete=models.CASCADE)
-    static_other = models.ForeignKey(ShardStaticB, null=True, on_delete=models.CASCADE)
 
     objects = ShardManager()
 
@@ -33,7 +32,6 @@ class ShardModelA(ShardMixin, models.Model):
 
 class ShardModelB(ShardMixin, models.Model):
     user_id = models.IntegerField(verbose_name='유저 idx')
-    parent = models.ForeignKey(ShardModelA, null=True, on_delete=models.CASCADE)
 
     objects = ShardManager()
 
@@ -43,5 +41,4 @@ class ShardModelB(ShardMixin, models.Model):
 
 class NormalModel(models.Model):
     normal_parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
-    shard_parent = models.ForeignKey(ShardModelA, null=True, on_delete=models.CASCADE)
     static_all = models.ForeignKey(ShardStaticAll, null=True, on_delete=models.CASCADE)
