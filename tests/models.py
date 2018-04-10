@@ -1,30 +1,30 @@
 from django.db import models
 
 from shard.fields import TableStrategyPkField
-from shard.managers import ShardManager
+from shard.managers import ShardManager, ShardStaticManager
 from shard.mixins import ShardStaticMixin, ShardMixin
 from shard.models import TableStrategyModel
 
 
 class ShardStaticAll(ShardStaticMixin, models.Model):
-    pass
+    objects = ShardStaticManager()
 
 
 class ShardStaticA(ShardStaticMixin, models.Model):
     shard_group = 'shard_a'
-    diffusible = False
+
+    objects = ShardStaticManager()
 
 
 class ShardStaticB(ShardStaticMixin, models.Model):
     shard_group = 'shard_b'
     diffusible = False
 
+    objects = ShardStaticManager()
+
 
 class ShardModelA(ShardMixin, models.Model):
     user_id = models.IntegerField(verbose_name='유저 idx')
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
-    static_same = models.ForeignKey(ShardStaticA, null=True, on_delete=models.CASCADE)
-    static_all = models.ForeignKey(ShardStaticAll, null=True, on_delete=models.CASCADE)
 
     objects = ShardManager()
 
@@ -42,8 +42,7 @@ class ShardModelB(ShardMixin, models.Model):
 
 
 class NormalModel(models.Model):
-    normal_parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
-    static_all = models.ForeignKey(ShardStaticAll, null=True, on_delete=models.CASCADE)
+    pass
 
 
 class TestIds(TableStrategyModel):
