@@ -1,7 +1,9 @@
 from django.db import models
 
+from shard.fields import TableStrategyPkField, UUID4StrategyPkField
 from shard.managers import ShardManager
 from shard.mixins import ShardStaticMixin, ShardMixin
+from shard.models import TableStrategyModel
 
 
 class ShardStaticAll(ShardStaticMixin, models.Model):
@@ -42,3 +44,15 @@ class ShardModelB(ShardMixin, models.Model):
 class NormalModel(models.Model):
     normal_parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     static_all = models.ForeignKey(ShardStaticAll, null=True, on_delete=models.CASCADE)
+
+
+class TestIds(TableStrategyModel):
+    pass
+
+
+class IdGenerateTestModel(models.Model):
+    id = TableStrategyPkField(source_model='tests.TestIds', primary_key=True)
+
+
+class UUIDTestModel(models.Model):
+    id = UUID4StrategyPkField(primary_key=True, max_length=32, verbose_name='UUID Pk field')

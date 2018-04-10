@@ -22,8 +22,7 @@ class TableStrategy(BaseIDGenerationStrategy):
         model_db = getattr(model, '_specific_database', 'default')
         with transaction.atomic(model_db):
             cursor = connections[model_db].cursor()
-
-            sql = 'INSERT INTO %s DEFAULT VALUES' % (
+            sql = 'INSERT INTO %s () VALUES ()' % (
                 model._meta.db_table,  # flake8: noqa: W0212  # pylint: disable=protected-access
             )
 

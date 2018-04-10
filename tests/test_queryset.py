@@ -33,4 +33,4 @@ class QuerysetTestCase(TestCase):
         self.assertEqual(get_shard_by_shard_key_and_shard_group(shard_key=100, shard_group=self.shard_group), fix_shard.db)
 
         with self.assertRaises(RequireShardKeyException):
-            print(FakeModel.objects.filter())
+            FakeModel.objects.filter()
