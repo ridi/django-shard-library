@@ -2,6 +2,7 @@ import typing
 
 from django.db.models.manager import Manager
 
+from shard.exceptions import NotExistsOriginalDataException
 from shard.queryset import ShardQuerySet
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from shard.utils.shard_key import get_shard_key_from_kwargs, mod_shard_key_by_replica_count
@@ -18,7 +19,7 @@ def _wrap(func_name):
     return wrapped
 
 
-class ShardStaticManager(Manager):
+class BaseShardManager(Manager):
     def shard(self, shard_key):
         _shard_key = mod_shard_key_by_replica_count(shard_key, self.model.shard_group)
         shard = get_shard_by_shard_key_and_shard_group(shard_key=_shard_key, shard_group=self.model.shard_group)
@@ -28,14 +29,22 @@ class ShardStaticManager(Manager):
         hints = {'shard_key': shard_key}
         return ShardQuerySet(model=self.model, hints=hints)
 
+
+class ShardStaticManager(BaseShardManager):
+    def get_queryset(self, shard_key=None):
+        if not self.model.diffusible and shard_key is None:
+            raise NotExistsOriginalDataException()
+
+        return super().get_queryset(shard_key=shard_key)
+
+
+class ShardManager(BaseShardManager):
     def raw(self, shard_key: int, query: str):
         return self.shard(shard_key=shard_key).raw(query)
 
     def bulk_create(self, shard_key: int, objs: typing.List, batch_size: int):
         return self.shard(shard_key=shard_key).bulk_create(objs=objs, batch_size=batch_size)
 
-
-class ShardManager(ShardStaticManager):
     filter = _wrap('filter')
     get = _wrap('get')
     create = _wrap('create')
