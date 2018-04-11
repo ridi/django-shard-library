@@ -1,6 +1,0 @@
-
-CREATE DATABASE `default` CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE DATABASE `shard_a_20_0` CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE DATABASE `shard_a_21_1` CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE DATABASE `shard_b_20_0` CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE DATABASE `shard_b_21_1` CHARACTER SET utf8 COLLATE utf8_general_ci;

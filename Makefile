@@ -17,7 +17,7 @@ test:
 # Prepare to test
 run-test-db:
 	make up-test-db
-	sh docker/wait_for_it.sh 'mysqladmin ping -h 127.0.0.1 -u root -proot' 'make test-migration'
+	sh docker/wait_for_it.sh 'mysqladmin ping -h 127.0.0.1 -u root -proot' 'make init-database && make migration'
 
 stop-test-db:
 	@docker-compose -f docker/docker-compose-test-db.yml down
@@ -25,7 +25,10 @@ stop-test-db:
 up-test-db:
 	@docker-compose -f docker/docker-compose-test-db.yml up -d
 
-test-migration:
+init-database:
+	@mysql -h 127.0.0.1 -u root -p < docker/create_database.sql
+
+migration:
 	@python3.6 runcommand.py migrate
 
 
