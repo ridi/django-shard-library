@@ -2,6 +2,7 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 
 from shard.routers.shard import ShardRouter
+from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from tests.models import ShardModelA, NormalModel, ShardModelB, ShardStaticAll, ShardStaticA, ShardStaticB
 
 
@@ -64,7 +65,9 @@ class ShardRouterTestCase(TestCase):
     def test_allow_relation_with_a_normal_object_and_a_static_object(self):
         shard_all_static = G(ShardStaticAll)
         shard_a_static = G(ShardStaticA)
-        shard_b_static = ShardStaticB.objects.shard(shard_key=1).create()
+        shard_b_static = ShardStaticB.objects.shard(
+            get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
+        ).create()
 
         normal_object = G(NormalModel)
 
@@ -80,7 +83,9 @@ class ShardRouterTestCase(TestCase):
     def test_allow_relation_with_two_static_objects(self):
         shard_all_static = G(ShardStaticAll)
         shard_a_static = G(ShardStaticA)
-        shard_b_static = ShardStaticB.objects.shard(shard_key=1).create()
+        shard_b_static = ShardStaticB.objects.shard(
+            get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
+        ).create()
 
         self.assertTrue(self.router.allow_relation(shard_a_static, shard_all_static))
         self.assertTrue(self.router.allow_relation(shard_b_static, shard_all_static))
