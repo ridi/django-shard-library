@@ -31,9 +31,7 @@ def _wrap_for_static(func_name):
 
 
 class BaseShardManager(Manager):
-    def shard(self, shard_key):
-        _shard_key = mod_shard_key_by_replica_count(shard_key, self.model.shard_group)
-        shard = get_shard_by_shard_key_and_shard_group(shard_key=_shard_key, shard_group=self.model.shard_group)
+    def shard(self, shard: str):
         return self.get_queryset().using(shard)
 
     def get_queryset(self, shard_key=None):
@@ -50,11 +48,17 @@ class ShardStaticManager(BaseShardManager):
 
 
 class ShardManager(BaseShardManager):
+    def _get_shard(self, shard_key: int) -> str:
+        _shard_key = mod_shard_key_by_replica_count(shard_key, self.model.shard_group)
+        shard = get_shard_by_shard_key_and_shard_group(shard_key=_shard_key, shard_group=self.model.shard_group)
+
+        return shard
+
     def raw(self, shard_key: int, query: str):
-        return self.shard(shard_key=shard_key).raw(query)
+        return self.shard(shard=self._get_shard(shard_key=shard_key)).raw(query)
 
     def bulk_create(self, shard_key: int, objs: typing.List, batch_size: int):
-        return self.shard(shard_key=shard_key).bulk_create(objs=objs, batch_size=batch_size)
+        return self.shard(shard=self._get_shard(shard_key=shard_key)).bulk_create(objs=objs, batch_size=batch_size)
 
     filter = _wrap('filter')
     get = _wrap('get')
