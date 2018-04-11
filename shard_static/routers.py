@@ -6,6 +6,7 @@ from django.conf import settings
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.mixins import ShardMixin
 from shard.routers.base import BaseReplicationRouter
+from shard.utils.shard import get_shard_by_shard_key_and_shard_group, get_shard_by_instance
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.mixins import ShardStaticMixin
 
@@ -60,7 +61,13 @@ class ShardStaticRouter(BaseReplicationRouter):
         return shard_group_for_db == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
-        # ShardStaticRouter has not opinion.
-        # Because ShardStatic is use `using method` in queryset.
-        # If ShardStatic don't use `using method`, you always route default.
-        return None
+        if not issubclass(model, ShardMixin):
+            return None
+
+        shard = None
+        if hints.get('shard_key'):
+            shard = get_shard_by_shard_key_and_shard_group(shard_key=hints['shard_key'], shard_group=model.shard_group)
+        elif hints.get('instance'):
+            shard = get_shard_by_instance(instance=hints['instance'])
+
+        return shard

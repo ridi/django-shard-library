@@ -61,7 +61,7 @@ SETTINGS_DICT = {
         'shard_static',
     ],
     'DATABASE_ROUTERS': [
-        'shard.routers.specific.SpecificRouter',  'shard_static.routers.ShardStaticRouter', 'shard.routers.shard.ShardRouter',
+        'shard.routers.specific.SpecificRouter',  'shard_static.routers.ShardStaticRouter',
     ]
 }
 
