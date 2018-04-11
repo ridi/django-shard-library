@@ -2,7 +2,7 @@
 DEFAULT_LOCK_TTL = 60 * 5
 
 
-class LockHelper:
+class BaseLockManager:
     def __init__(self, key: str, ttl: int=DEFAULT_LOCK_TTL):
         self.key = key
         self.ttl = ttl
