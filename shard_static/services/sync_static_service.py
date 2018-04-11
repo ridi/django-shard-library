@@ -10,7 +10,7 @@ from shard.utils.database import get_master_databases_by_shard_group
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
-from shard_static.utils.lock.base import BaseLockManager
+from shard_static.services import lock_service
 
 logger = logging.getLogger('shard_static.services.sync_static_service')
 
@@ -21,7 +21,7 @@ def sync_static(model_name: str, database_alias: str):
     _validate_model(model)
     _validate_database(model, database_alias)
 
-    lock_manager = _get_lock_manager(model_name, database_alias)
+    lock_manager = lock_service.get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
         logger.info('Already exists processing - %s, %s' % (model_name, database_alias))
 
@@ -75,15 +75,3 @@ def _get_shard_group_from_database(database_alias: str) -> Optional[str]:
         return config.get(DATABASE_CONFIG_SHARD_GROUP, None)
 
     return None
-
-
-def _get_lock_manager(model_name: str, database_alias: str) -> BaseLockManager:
-    lock_key = _make_lock_key(model_name, database_alias)
-    ttl = StaticSyncConfig.get_lock_ttl()
-    lock_manager_class = get_class
-
-    return lock_manager_class(key=lock_key, ttl=ttl)
-
-
-def _make_lock_key(model_name: str, database_alias: str) -> str:
-    return 'lock:%s:%s' % (model_name, database_alias)
