@@ -1,4 +1,4 @@
-from shard_static_sync.constants import ALL_SHARD_GROUP
+from shard_static.constants import ALL_SHARD_GROUP
 
 
 class ShardStaticMixin:

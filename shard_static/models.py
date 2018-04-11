@@ -1,7 +1,7 @@
 from django.db import models
 
-from shard_static_sync.managers import ShardStaticManager
-from shard_static_sync.mixins import ShardStaticMixin
+from shard_static.managers import ShardStaticManager
+from shard_static.mixins import ShardStaticMixin
 
 
 class StaticSyncStatus(ShardStaticMixin, models.Model):

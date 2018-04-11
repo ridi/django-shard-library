@@ -1,0 +1,80 @@
+import logging
+from typing import Optional, Type
+
+from django.apps import apps
+from django.conf import settings
+
+from shard.constants import ALL_SHARD_GROUP, DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
+from shard.utils.database import get_master_databases_by_shard_group
+from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
+from shard_static.models import BaseShardStaticModel, StaticSyncStatus
+from shard_static.utils.lock.base import BaseLockManager
+
+logger = logging.getLogger('shard_static.services.sync_static_service')
+
+
+def sync_static(model_name: str, database_alias: str):
+    model = _get_model(model_name=model_name)
+
+    _validate_model(model)
+    _validate_database(model, database_alias)
+
+    # Lock Check
+    lock_manager = _get_lock_manager(model_name, database_alias)
+    if not lock_manager.lock():
+        logger.info('Already exists processing - %s, %s' % (model_name, database_alias))
+
+    try:
+        sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias)\
+            .get_or_create(key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
+    finally:
+        lock_manager.release()
+
+
+def _get_model(model_name: str) -> Type[BaseShardStaticModel]:
+    _splited = model_name.split('.')
+    _label, _model_name = _splited[0], _splited[1]
+
+    app = apps.get_app_config(_label)
+    model = app.get_model(_model_name)
+    return model
+
+
+def _validate_model(model: Type[BaseShardStaticModel]):
+    if not issubclass(model, BaseShardStaticModel):
+        raise NotShardStaticException()
+
+    if not model.diffusible:
+        raise NotDiffusibleException()
+
+
+def _validate_database(model: Type[BaseShardStaticModel], database_alias: str):
+    if database_alias == DEFAULT_DATABASE:
+        raise InvalidDatabaseAliasException()
+
+    if _get_shard_group_from_database(database_alias) is None:
+        raise InvalidDatabaseAliasException()
+
+    databases = get_master_databases_by_shard_group(shard_group=model.shard_group)
+    if model.shard_group != ALL_SHARD_GROUP and database_alias in databases:
+        raise InvalidDatabaseAliasException()
+
+
+def _get_shard_group_from_database(database_alias: str) -> Optional[str]:
+    config = settings.DATABASES.get(database_alias, None)
+    if config:
+        return config.get(DATABASE_CONFIG_SHARD_GROUP, None)
+
+    return None
+
+
+def _get_lock_manager(model_name: str, database_alias: str) -> BaseLockManager:
+    lock_key = _make_lock_key(model_name, database_alias)
+    ttl = StaticSyncConfig.get_lock_ttl()
+    lock_manager_class = get_class
+
+    return lock_manager_class(key=lock_key, ttl=ttl)
+
+
+def _make_lock_key(model_name: str, database_alias: str) -> str:
+    return 'lock:%s:%s' % (model_name, database_alias)

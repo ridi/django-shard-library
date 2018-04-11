@@ -6,8 +6,8 @@ from django.conf import settings
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.mixins import ShardMixin
 from shard.routers.base import BaseReplicationRouter
-from shard_static_sync.constants import ALL_SHARD_GROUP
-from shard_static_sync.mixins import ShardStaticMixin
+from shard_static.constants import ALL_SHARD_GROUP
+from shard_static.mixins import ShardStaticMixin
 
 
 class ShardStaticRouter(BaseReplicationRouter):
@@ -46,7 +46,7 @@ class ShardStaticRouter(BaseReplicationRouter):
             model = app.get_model(model_name)
 
         shard_group_for_db = settings.DATABASES[db].get(DATABASE_CONFIG_SHARD_GROUP, None)
-        if not issubclass(model, ShardStaticMixin):
+        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
             if shard_group_for_db:
                 return False
             return None

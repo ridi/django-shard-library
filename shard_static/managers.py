@@ -1,6 +1,6 @@
 
 from shard.managers import BaseShardManager
-from shard_static_sync.exceptions import NotExistsOriginalDataException
+from shard_static.exceptions import NotExistsOriginalDataException
 
 
 def _wrap_for_static(func_name):
