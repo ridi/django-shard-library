@@ -3,9 +3,11 @@ from typing import Optional, Type
 
 from django.apps import apps
 from django.conf import settings
+from django.db import transaction
 
-from shard.constants import ALL_SHARD_GROUP, DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
+from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
+from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
 from shard_static.utils.lock.base import BaseLockManager
@@ -19,7 +21,6 @@ def sync_static(model_name: str, database_alias: str):
     _validate_model(model)
     _validate_database(model, database_alias)
 
-    # Lock Check
     lock_manager = _get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
         logger.info('Already exists processing - %s, %s' % (model_name, database_alias))
@@ -27,6 +28,14 @@ def sync_static(model_name: str, database_alias: str):
     try:
         sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias)\
             .get_or_create(key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
+
+        origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
+        # Limit Count check
+        with transaction.atomic(database_alias):
+            # update_or_create
+            # update last_modified at sync_status
+            pass
+
     finally:
         lock_manager.release()
 
