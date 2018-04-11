@@ -1,6 +1,5 @@
 from django.db import models
 
-from shard.constants import ALL_SHARD_GROUP
 from shard.exceptions import StrategyNotImplementException, RequireSpecificDatabaseException
 
 __all__ = ('StrategyPkMixin', 'SpecificDatabaseMixin', 'ShardMixin', )
@@ -49,11 +48,3 @@ class ShardMixin:
 
     def get_shard_key(self):
         return getattr(self, self.shard_key_name)
-
-
-class ShardStaticMixin:
-    shard_group = ALL_SHARD_GROUP
-
-    # If difussible set true, exists source data in default
-    # If difussible set false, only exists in shard database
-    diffusible = True

@@ -3,9 +3,8 @@ from typing import Optional
 from django.apps import apps
 from django.conf import settings
 
-from shard.constants import ALL_SHARD_GROUP, DEFAULT_DATABASE
-from shard.mixins import ShardMixin, ShardStaticMixin
-
+from shard.constants import DATABASE_CONFIG_SHARD_GROUP
+from shard.mixins import ShardMixin
 from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_instance, get_shard_by_shard_key_and_shard_group
 
@@ -16,14 +15,8 @@ class ShardRouter(BaseReplicationRouter):
         if super_allow_relation is not None:
             return super_allow_relation
 
-        if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
-            return obj1.shard_group == obj2.shard_group or obj1.shard_group == ALL_SHARD_GROUP or obj2.shard_group == ALL_SHARD_GROUP
-
-        if isinstance(obj1, ShardStaticMixin):
-            return obj1.diffusible
-
-        if isinstance(obj2, ShardStaticMixin):
-            return obj2.diffusible
+        if isinstance(obj1, ShardMixin) and isinstance(obj2, ShardMixin):
+            return obj1.shard_group == obj2.shard_group
 
         return None
 
@@ -45,17 +38,11 @@ class ShardRouter(BaseReplicationRouter):
             app = apps.get_app_config(app_label)
             model = app.get_model(model_name)
 
-        shard_group_for_db = settings.DATABASES[db].get('SHARD_GROUP', None)
-        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
+        shard_group_for_db = settings.DATABASES[db].get(DATABASE_CONFIG_SHARD_GROUP, None)
+        if not issubclass(model, ShardMixin):
             if shard_group_for_db:
                 return False
             return None
-
-        if issubclass(model, ShardStaticMixin):
-            if model.shard_group == ALL_SHARD_GROUP and (db == DEFAULT_DATABASE or shard_group_for_db):
-                return True
-            elif model.diffusible and db == DEFAULT_DATABASE:
-                return True
 
         return shard_group_for_db == model.shard_group
 

@@ -2,29 +2,17 @@ import typing
 
 from django.db.models.manager import Manager
 
-from shard.exceptions import NotExistsOriginalDataException
 from shard.queryset import ShardQuerySet
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from shard.utils.shard_key import get_shard_key_from_kwargs
 
-__all__ = ('ShardStaticManager', 'ShardManager', )
+__all__ = ('ShardManager', )
 
 
 def _wrap(func_name):
     def wrapped(self, *args, **kwargs):
         shard_key = get_shard_key_from_kwargs(model=self.model, **kwargs)
         return getattr(self.get_queryset(shard_key=shard_key), func_name)(*args, **kwargs)
-
-    wrapped.__name__ = func_name
-    return wrapped
-
-
-def _wrap_for_static(func_name):
-    def wrapped(self, *args, **kwargs):
-        if not self.model.diffusible:
-            raise NotExistsOriginalDataException()
-
-        return getattr(self.get_queryset(), func_name)(*args, **kwargs)
 
     wrapped.__name__ = func_name
     return wrapped
@@ -37,14 +25,6 @@ class BaseShardManager(Manager):
     def get_queryset(self, shard_key=None):
         hints = {'shard_key': shard_key}
         return ShardQuerySet(model=self.model, hints=hints)
-
-
-class ShardStaticManager(BaseShardManager):
-    filter = _wrap_for_static('filter')
-    get = _wrap_for_static('get')
-    create = _wrap_for_static('create')
-    get_or_create = _wrap_for_static('get_or_create')
-    update_or_create = _wrap_for_static('update_or_create')
 
 
 class ShardManager(BaseShardManager):

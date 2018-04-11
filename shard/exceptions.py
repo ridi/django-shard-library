@@ -2,7 +2,7 @@ from typing import List
 
 __all__ = (
     'StrategyNotImplementException', 'RequireSpecificDatabaseException', 'RequireMasterConfigException', 'NotShardingModelException',
-    'RequireShardKeyException', 'QueryExecuteFailureException', 'NotExistsOriginalDataException',
+    'RequireShardKeyException', 'QueryExecuteFailureException',
 )
 
 
@@ -33,7 +33,3 @@ class QueryExecuteFailureException(Exception):
         self.parent_exception = exception
 
         super().__init__(*args, **kwargs)
-
-
-class NotExistsOriginalDataException(Exception):
-    pass
