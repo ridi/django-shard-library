@@ -15,11 +15,11 @@ def get_shard_key_from_kwargs(model, **kwargs) -> int:
     if model.shard_key_name not in kwargs:
         raise RequireShardKeyException()
 
-    return mod_shard_key_by_replica_count(kwargs[model.shard_key_name], model.shard_group)
+    return kwargs[model.shard_key_name]
 
 
 def get_shard_key_from_instance(instance: ShardMixin) -> int:
-    return mod_shard_key_by_replica_count(instance.get_shard_key(), instance.shard_group)
+    return instance.get_shard_key()
 
 
 def mod_shard_key_by_replica_count(shard_key: int, shard_group: str) -> int:
