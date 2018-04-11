@@ -1,26 +1,23 @@
 from django.db import models
 
 from shard.fields import TableStrategyPkField
-from shard.managers import ShardManager, ShardStaticManager
-from shard.mixins import ShardStaticMixin, ShardMixin
+from shard.managers import ShardManager
+from shard.mixins import ShardMixin
 from shard.models import TableStrategyModel
+from shard_static.models import BaseShardStaticModel
 
 
-class ShardStaticAll(ShardStaticMixin, models.Model):
-    objects = ShardStaticManager()
+class ShardStaticAll(BaseShardStaticModel, models.Model):
+    pass
 
 
-class ShardStaticA(ShardStaticMixin, models.Model):
+class ShardStaticA(BaseShardStaticModel, models.Model):
     shard_group = 'shard_a'
 
-    objects = ShardStaticManager()
 
-
-class ShardStaticB(ShardStaticMixin, models.Model):
+class ShardStaticB(BaseShardStaticModel, models.Model):
     shard_group = 'shard_b'
     diffusible = False
-
-    objects = ShardStaticManager()
 
 
 class ShardModelA(ShardMixin, models.Model):
