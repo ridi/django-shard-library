@@ -21,6 +21,10 @@ SETTINGS_DICT = {
                     'database_name': 'shard_a',
                     'logical_count': 2,
                 },
+                'db_options': {
+                    'sql_mode': 'STRICT_TRANS_TABLES',
+                    'charset': 'utf8',
+                },
                 'shards': [
                     {
                         'master': 'mysql://root:root@127.0.0.1/',
@@ -34,6 +38,10 @@ SETTINGS_DICT = {
                 'shard_options': {
                     'database_name': 'shard_b',
                     'logical_count': 2,
+                },
+                'db_options': {
+                    'sql_mode': 'STRICT_TRANS_TABLES',
+                    'charset': 'utf8',
                 },
                 'shards': [
                     {
