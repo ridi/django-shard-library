@@ -1,3 +1,4 @@
+# flake8: noqa: E1123  # pylint:disable=unexpected-keyword-arg
 # flake8: noqa: W0212 pylint: disable=protected-access
 from django.test import TestCase
 from django_dynamic_fixture import G

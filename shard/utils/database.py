@@ -5,7 +5,9 @@ from django.conf import settings
 from shard.utils.memorize import memorize
 from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
 
-__all__ = ('get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group', 'get_slave_databases_by_master', )
+__all__ = (
+    'get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group', 'get_slave_databases_by_master',
+)
 
 
 @memorize
