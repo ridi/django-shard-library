@@ -51,7 +51,7 @@ def sync_static(model_name: str, database_alias: str):
 
             sync_status.last_modified = last_modified
             sync_status.save()
-    except:  # flake8: noqa: E722  # pylint:disable=bare-except
+    except:  # flake8: noqa: E722 pylint: disable=bare-except
         logger.exception(f'[EXCEPTION] {model_name}:{database_alias} raise exceptions while syncing')
     finally:
         lock_manager.release()
