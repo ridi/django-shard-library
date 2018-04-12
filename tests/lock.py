@@ -1,22 +1,25 @@
-from shard_static.constants import DEFAULT_LOCK_TTL
 from shard_static.lock import BaseLockManager
+
+_fake_cache = {}
 
 
 class FakeLockManager(BaseLockManager):
-    def __init__(self, key: str, ttl: int=DEFAULT_LOCK_TTL):
-        super().__init__(key, ttl)
-        self._is_locked = False
-
     def is_locked(self) -> bool:
-        return self._is_locked
+        return self.key in _fake_cache
 
     def lock(self) -> bool:
-        self._is_locked = True
-        return self._is_locked
+        if self.is_locked():
+            return False
+
+        _fake_cache[self.key] = self.uuid
+        return True
 
     def release(self) -> bool:
-        self._is_locked = False
-        return True
+        if self.is_locked():
+            del _fake_cache[self.key]
+            return True
+
+        return False
 
     def ping(self) -> bool:
-        return True
+        return self.key in _fake_cache
