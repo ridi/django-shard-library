@@ -22,6 +22,7 @@ class ShardStaticB(BaseShardStaticModel, models.Model):
 
 class ShardModelA(ShardMixin, models.Model):
     user_id = models.IntegerField(verbose_name='유저 idx')
+    text = models.CharField(max_length=64, null=False, blank=True, verbose_name='더미 텍스트')
 
     objects = ShardManager()
 
