@@ -27,6 +27,6 @@ class ShardStaticManager(BaseShardManager):
         qs = self.get_queryset()
 
         if last_modified:
-            qs = qs.filter(last_modified__gte=last_modified)
+            qs = qs.filter(last_modified__gt=last_modified)
 
         return qs

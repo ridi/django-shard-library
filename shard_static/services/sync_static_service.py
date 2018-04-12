@@ -4,9 +4,11 @@ from typing import Optional, Type
 from django.apps import apps
 from django.conf import settings
 from django.db import transaction
+from django.forms import model_to_dict
 
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
+from shard_static.config import SHARD_SYNC_MAX_ITEMS
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
@@ -27,15 +29,30 @@ def sync_static(model_name: str, database_alias: str):
 
     try:
         sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias)\
-            .get_or_create(key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
-
+            .get_or_create(static_model_key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
         origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
-        # Limit Count check
-        with transaction.atomic(database_alias):
-            # update_or_create
-            # update last_modified at sync_status
-            pass
 
+        if origin_data.count() >= SHARD_SYNC_MAX_ITEMS:
+            logger.warning('[WARNING] %s:%s greater than or equal to MAX_ITEMS' % (model_name, database_alias))
+            return
+
+        with transaction.atomic(database_alias):
+            last_modified = None
+            for _data in origin_data:
+                if not last_modified or last_modified < _data.last_modified:
+                    last_modified = _data.last_modified
+
+                model.objects.shard(shard=database_alias).update_or_create(
+                    id=_data.id,
+                    defaults=model_to_dict(
+                        _data, fields=[field.name for field in _data._meta.fields]  # flake8: noqa: W0212 pylint: disable=protected-access
+                    )
+                )
+
+            sync_status.last_modified = last_modified
+            sync_status.save()
+    except:
+        logger.exception('[EXCEPTION] %s:%s raise exceptions while syncing' % (model_name, database_alias))
     finally:
         lock_manager.release()
 
@@ -65,7 +82,7 @@ def _validate_database(model: Type[BaseShardStaticModel], database_alias: str):
         raise InvalidDatabaseAliasException()
 
     databases = get_master_databases_by_shard_group(shard_group=model.shard_group)
-    if model.shard_group != ALL_SHARD_GROUP and database_alias in databases:
+    if model.shard_group != ALL_SHARD_GROUP and database_alias not in databases:
         raise InvalidDatabaseAliasException()
 
 
