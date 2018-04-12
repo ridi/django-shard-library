@@ -1,5 +1,4 @@
-
-DEFAULT_LOCK_TTL = 60 * 5
+from shard_static.constants import DEFAULT_LOCK_TTL
 
 
 class BaseLockManager:
