@@ -8,7 +8,7 @@ from django.forms import model_to_dict
 
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
-from shard_static.config import SHARD_SYNC_MAX_ITEMS
+from shard_static import config
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
@@ -25,15 +25,15 @@ def sync_static(model_name: str, database_alias: str):
 
     lock_manager = lock_service.get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
-        logger.info('Already exists processing - %s, %s' % (model_name, database_alias))
+        logger.info(f'Already exists processing - {model_name}, {database_alias}')
 
     try:
         sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias)\
             .get_or_create(static_model_key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
         origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
 
-        if origin_data.count() >= SHARD_SYNC_MAX_ITEMS:
-            logger.warning('[WARNING] %s:%s greater than or equal to MAX_ITEMS' % (model_name, database_alias))
+        if origin_data.count() >= config.SHARD_SYNC_MAX_ITEMS:
+            logger.warning(f'[WARNING] {model_name}:{database_alias} greater than or equal to MAX_ITEMS')
             return
 
         with transaction.atomic(database_alias):
@@ -52,7 +52,7 @@ def sync_static(model_name: str, database_alias: str):
             sync_status.last_modified = last_modified
             sync_status.save()
     except:
-        logger.exception('[EXCEPTION] %s:%s raise exceptions while syncing' % (model_name, database_alias))
+        logger.exception(f'[EXCEPTION] {model_name}:{database_alias} raise exceptions while syncing')
     finally:
         lock_manager.release()
 
