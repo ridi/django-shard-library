@@ -1,3 +1,4 @@
+# flake8: noqa: W0212  # pylint: disable=protected-access
 from django.test import TestCase
 
 from shard.exceptions import RequireShardKeyException
@@ -25,14 +26,14 @@ class QuerysetTestCase(TestCase):
         with self.assertRaises(RequireShardKeyException):
             ShardModelA.objects.get()
 
-        with self.assertRaises(ShardModelA.DoesNotExist):
+        with self.assertRaises(ShardModelA.DoesNotExist):  # pylint: disable=no-member
             ShardModelA.objects.get(user_id=1)
 
         try:
             ShardModelA.objects.create(user_id=1)
             obj = ShardModelA.objects.get(user_id=1)
             obj.delete()
-        except:
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
             self.fail('ShardQuerySet get method is not normally.')
 
     def test_create(self):
@@ -42,7 +43,7 @@ class QuerysetTestCase(TestCase):
         try:
             obj = ShardModelA.objects.create(user_id=3)
             obj.delete()
-        except:
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
             self.fail('ShardQuerySet create method is not normally.')
 
     def test_get_or_create(self):
@@ -59,7 +60,7 @@ class QuerysetTestCase(TestCase):
             self.assertFalse(created_late)
 
             obj.delete()
-        except:
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
             self.fail('ShardQuerySet get_or_create method is not normally.')
 
     def test_update_or_create(self):
@@ -76,5 +77,5 @@ class QuerysetTestCase(TestCase):
             self.assertFalse(created)
 
             obj.delete()
-        except:
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
             self.fail('ShardQuerySet update_or_create method is not normally.')

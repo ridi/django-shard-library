@@ -51,7 +51,7 @@ def sync_static(model_name: str, database_alias: str):
 
             sync_status.last_modified = last_modified
             sync_status.save()
-    except:
+    except:  # flake8: noqa: E722  # pylint:disable=bare-except
         logger.exception(f'[EXCEPTION] {model_name}:{database_alias} raise exceptions while syncing')
     finally:
         lock_manager.release()
@@ -87,8 +87,8 @@ def _validate_database(model: Type[BaseShardStaticModel], database_alias: str):
 
 
 def _get_shard_group_from_database(database_alias: str) -> Optional[str]:
-    config = settings.DATABASES.get(database_alias, None)
-    if config:
-        return config.get(DATABASE_CONFIG_SHARD_GROUP, None)
+    db_setting = settings.DATABASES.get(database_alias, None)
+    if db_setting:
+        return db_setting.get(DATABASE_CONFIG_SHARD_GROUP, None)
 
     return None
