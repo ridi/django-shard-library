@@ -5,14 +5,14 @@ from django.conf import settings
 from shard.utils.memorize import memorize
 from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
 
-__all__ = ('get_master_databases', 'get_master_databases_by_shard_group', 'get_slave_databases_by_master', )
+__all__ = ('get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group', 'get_slave_databases_by_master', )
 
 
 @memorize
 def get_master_databases(without_shard: bool = True) -> List:
     databases = _get_databases()
-
     result = []
+
     for key, config in databases.items():
         if config.get(DATABASE_CONFIG_MASTER):
             continue
@@ -20,6 +20,23 @@ def get_master_databases(without_shard: bool = True) -> List:
         if without_shard:
             if config.get(DATABASE_CONFIG_SHARD_GROUP) or config.get(DATABASE_CONFIG_SHARD_NUMBER):
                 continue
+
+        result.append(key)
+
+    return result
+
+
+@memorize
+def get_master_databases_for_shard() -> List:
+    databases = _get_databases()
+    result = []
+
+    for key, config in databases.items():
+        if config.get(DATABASE_CONFIG_MASTER):
+            continue
+
+        if config.get(DATABASE_CONFIG_SHARD_GROUP) is None or config.get(DATABASE_CONFIG_SHARD_NUMBER) is None:
+            continue
 
         result.append(key)
 

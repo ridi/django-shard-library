@@ -55,6 +55,12 @@ class DatabaseUtilTestCase(TestCase):
         self.assertEqual(len(primary_configs_without_shard), 1)
         self.assertEqual(len(primary_configs_include_shard), 7)
 
+    def test_get_master_databases_for_shard(self):
+        databases = database.get_master_databases_for_shard(clear=True)
+
+        self.assertEqual(len(databases), 6)
+
+
     def test_get_master_databases_by_shard_group(self):
         primary_configs_product_group = database.get_master_databases_by_shard_group(shard_group='PRODUCT_GROUP', clear=True)
         primary_configs_prepare_product_group = database.get_master_databases_by_shard_group(
