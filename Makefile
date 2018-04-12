@@ -9,7 +9,7 @@ install-dev:
 
 # Test
 lint:
-	python $(shell which pylint) ./shard ./tests --rcfile=.pylintrc && flake8
+	python $(shell which pylint) ./shard ./shard_static --rcfile=.pylintrc && flake8
 
 test:
 	python runtests.py
