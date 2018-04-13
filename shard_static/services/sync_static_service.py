@@ -29,7 +29,7 @@ def sync_static(model_name: str, database_alias: str):
 
     try:
         sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias)\
-            .get_or_create(static_model_key=model._meta.db_table)  # flake8: noqa: W0212 pylint: disable=protected-access
+            .get_or_create(static_model_key=_make_sync_key(model=model))
         origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
 
         if origin_data.count() >= config.SHARD_SYNC_MAX_ITEMS:
@@ -92,3 +92,7 @@ def _get_shard_group_from_database(database_alias: str) -> Optional[str]:
         return db_setting.get(DATABASE_CONFIG_SHARD_GROUP, None)
 
     return None
+
+
+def _make_sync_key(model: Type[BaseShardStaticModel]):
+    return model._meta.db_table  # flake8: noqa: W0212 pylint: disable=protected-access
