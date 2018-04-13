@@ -8,7 +8,7 @@
 ## Requirement
 - `Django 2.0.0` or higher
 - `Python 3.6` or higher
-- `MySQL or Mariadb` only
+- `MySQL` or `Mariadb` only
 
 ## Usage
 #### Setup
@@ -55,7 +55,7 @@ class ShardModel(ShardMixin, models.Model):
     shard_key_name = 'user_id'
 ```
 
-- Shard Key는 현재 Integer만 지원합니다.
+- `shard_key` is supported only integer type.
 
 ## Snippets
 We don't want to having dependency of celery and redis.  
@@ -63,18 +63,58 @@ If you want to using `shard_static`, you refer to this
 
 #### Supervisor for running syncer
 ``` python
+@task  # celery
+def wrap_sync_static(model_name, database_alias):
+    sync_static_service.sync_static(model_name, database_alias)
+
+def run_sync_supervisor():
+    static_models = [
+        ShardStaticA,
+        ShardStaticAll,
+        # ...
+    ]
+
+    for static_model in static_models:
+        databases = get_master_databases_for_shard() \
+            if static_model.shard_group == ALL_SHARD_GROUP else \
+            get_master_databases_by_shard_group(static_model.shard_group)
+
+        for database in databases:
+            wrap_sync_static.delay(static_model._meta.label, database)
 ```
 
 #### RedisLockManager
 ``` python
+
+class RedisLockManager(BaseLockManager):
+    def get_connection():
+        return Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DATABASE)
+
+    def is_locked(self) -> bool:
+        conn = self.get_connection()
+        value = conn.get(self.key)
+        return value is not None
+
+    def lock(self) -> bool:
+        conn = self.get_connection()
+        return conn.set(self.key, self.uuid, ex=self.ttl, nx=True)
+
+    def ping(self) -> bool:
+        conn = self.get_connection()
+        return conn.expire(self.key, self.ttl)
+
+    def release(self) -> bool:
+        conn = self.get_connection()
+        return conn.delete(self.key)
 ```
 
 ## Dependency
 - [dj-database-url](https://github.com/kennethreitz/dj-database-url)
 
 ## TODO
-- Example App 작성
-- 문서화
+- Feature automatically find static models (python meta programming or different way)
+- Write example app
+- Write docs
 
 ## Prior art
 - https://github.com/JBKahn/django-sharding
