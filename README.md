@@ -8,6 +8,7 @@
 ## Requirement
 - `Django 2.0.0` or higher
 - `Python 3.6` or higher
+- `MySQL or Mariadb` only
 
 ## Usage
 #### Setup
@@ -56,16 +57,24 @@ class ShardModel(ShardMixin, models.Model):
 
 - Shard Key는 현재 Integer만 지원합니다.
 
+## Snippets
+We don't want to having dependency of celery and redis.  
+If you want to using `shard_static`, you refer to this
+
+#### Supervisor for running syncer
+``` python
+```
+
+#### RedisLockManager
+``` python
+```
+
 ## Dependency
 - [dj-database-url](https://github.com/kennethreitz/dj-database-url)
 
 ## TODO
-
-- 모든 샤드에 공유되는 Static데이터기능 구현
 - Example App 작성
 - 문서화
-- migration
-
 
 ## Prior art
 - https://github.com/JBKahn/django-sharding
