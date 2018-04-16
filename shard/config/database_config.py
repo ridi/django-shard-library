@@ -95,4 +95,4 @@ def _make_shard_database_url(origin: str, database_name: str, logical_index: int
 
 
 def _make_shard_name(shard_group: str, shard_count: int, shard_index: int, logical_index: int) -> str:
-    return '%s_%d%d_%d' % (shard_group, shard_count, shard_index, logical_index)
+    return '%s_%d_%d_%d' % (shard_group, shard_count, shard_index, logical_index)
