@@ -14,3 +14,7 @@ class InvalidDatabaseAliasException(Exception):
 
 class NotExistsOriginalDataException(Exception):
     pass
+
+
+class TooManySyncItemsException(Exception):
+    pass
