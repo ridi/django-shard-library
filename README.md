@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/ridi/django-shard-library.svg?branch=master)](https://travis-ci.org/ridi/django-shard-library)
 
 ## Introduction
-- 장고 ORM에서 샤드기능을 지원하기 위한 라이브러리 입니다.
+- This library supports database shard in django orm.
 
 ## Requirement
 - `Django 2.0.0` or higher
