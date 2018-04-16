@@ -148,11 +148,5 @@ class RedisLockManager(BaseLockManager):
 - Step 3: When end of test, you stop to database.  
 `make stop-test-db`
 
-## TODO
-- Feature: one command all migrate
-- Feature: automatically find static models (python meta programming or different way)
-- Write example app
-- Write docs
-
 ## Prior art
 - https://github.com/JBKahn/django-sharding
