@@ -14,7 +14,7 @@ def get_lock_manager(model_name: str, database_alias: str) -> BaseLockManager:
 
 
 def _make_lock_key(model_name: str, database_alias: str) -> str:
-    return 'lock:%s:%s' % (model_name, database_alias)
+    return f'{config.SHARD_SYNC_LOCK_KEY_PREFIX}:{model_name}:{database_alias}'
 
 
 def _import_lock_manager_class() -> Type[BaseLockManager]:
