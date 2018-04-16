@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/ridi/django-shard-library.svg?branch=master)](https://travis-ci.org/ridi/django-shard-library)
 
 ## Introduction
-- This library supports database shard in django orm.
+- Python library for supporting sharding in Django ORM.
 
 ## Requirement
 - `Django 2.0.0` or higher
