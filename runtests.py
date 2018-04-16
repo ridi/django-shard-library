@@ -6,46 +6,70 @@ from django.test.utils import get_runner
 
 from shard.config.helper import ConfigHelper
 
-settings.configure(
-    DEBUG=True,
-    USE_TZ=True,
-    DATABASES=ConfigHelper.database_configs(
+SETTINGS_DICT = {
+    'DEBUG': True,
+    'USE_TZ': True,
+    'DATABASES': ConfigHelper.database_configs(
         unshard={
             'default': {
-                'master': 'sqlite://:memory:',
+                'master': 'mysql://root:root@127.0.0.1/default?sql_mode=STRICT_TRANS_TABLES&charset=utf8',
             },
         },
         shard={
-            'product_shard': {
+            'shard_a': {
                 'shard_options': {
-                    'database_name': 'product',
+                    'database_name': 'shard_a',
                     'logical_count': 2,
+                },
+                'db_options': {
+                    'sql_mode': 'STRICT_TRANS_TABLES',
+                    'charset': 'utf8',
                 },
                 'shards': [
                     {
-                        'master': 'sqlite://:memory:',
+                        'master': 'mysql://root:root@127.0.0.1/',
                     },
                     {
-                        'master': 'sqlite://:memory:',
+                        'master': 'mysql://root:root@127.0.0.1/',
+                    },
+                ]
+            },
+            'shard_b': {
+                'shard_options': {
+                    'database_name': 'shard_b',
+                    'logical_count': 2,
+                },
+                'db_options': {
+                    'sql_mode': 'STRICT_TRANS_TABLES',
+                    'charset': 'utf8',
+                },
+                'shards': [
+                    {
+                        'master': 'mysql://root:root@127.0.0.1/',
+                    },
+                    {
+                        'master': 'mysql://root:root@127.0.0.1/',
                     },
                 ]
             }
         }
     ),
-    INSTALLED_APPS=[
+    'INSTALLED_APPS': [
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sites',
         'tests',
+        'shard_static',
     ],
-    DATABASE_ROUTERS=[
-        'shard.routers.specific.SpecificRouter', 'shard.routers.shard.ShardRouter',
-    ]
-)
-django.setup()
+    'DATABASE_ROUTERS': ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter'],
+    'SHARD_SYNC_LOCK_MANAGER_CLASS': 'tests.lock.FakeLockManager',
+}
 
 
 def run_tests(*test_args):
+    settings.configure(**SETTINGS_DICT)
+    django.setup()
+
     if not test_args:
         test_args = ['tests']
 

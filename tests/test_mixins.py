@@ -19,7 +19,7 @@ class SpecificDatabaseMixinTestCase(TestCase):
         not_select = self.not_select_class()
 
         with self.assertRaises(RequireSpecificDatabaseException):
-            print(not_select.specific_database())
+            not_select.specific_database()
 
     def test_select_specific_database(self):
         select = self.select_class()

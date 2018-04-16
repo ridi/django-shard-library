@@ -1,0 +1,22 @@
+
+
+{% for static_model_key, shards in data.items %}
+<h3>Static Model Key - {{ static_model_key }}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Shard DB Alias</th>
+      <th>Last Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for shard_name, last_modified in shards.items %}
+    <tr>
+      <td>{{ shard_name }}</td>
+      <td>{{ last_modified }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<br><br><hr>
+{% endfor %}

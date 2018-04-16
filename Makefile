@@ -9,10 +9,32 @@ install-dev:
 
 # Test
 lint:
-	python $(shell which pylint) ./shard ./tests --rcfile=.pylintrc && flake8
+	python $(shell which pylint) ./shard ./shard_static ./tests --rcfile=.pylintrc && flake8
 
 test:
 	python runtests.py
+
+# Prepare to test
+run-test-db:
+	make up-test-db
+	sh docker/wait_for_it.sh 'mysqladmin ping -h 127.0.0.1 -u root -proot' 'make initialize'
+
+stop-test-db:
+	@docker-compose -f docker/docker-compose-test-db.yml down
+
+up-test-db:
+	@docker-compose -f docker/docker-compose-test-db.yml up -d
+
+initialize:
+	make create-database
+	make migration
+
+create-database:
+	@mysql -h 127.0.0.1 -u root -p < docker/create_database.sql
+
+migration:
+	@python3.6 runcommand.py migrate
+
 
 # Release
 dist:

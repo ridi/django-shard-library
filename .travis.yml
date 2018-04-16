@@ -2,6 +2,9 @@ language: python
 python:
   - '3.6'
 
+services:
+  - mysql
+
 stages:
   - test
   - name: deploy
@@ -10,8 +13,12 @@ stages:
 jobs:
   include:
   - stage: test
-    before_script: make install-dev
-    script: make test
+    before_script:
+      - make install-dev
+      - mysql -u root -e "use mysql; UPDATE user SET password=password('root') WHERE user='root'; flush privileges;"
+    script:
+      - make test
+      - make lint
   - stage: deploy
     script: skip
     deploy:

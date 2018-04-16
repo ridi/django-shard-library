@@ -8,10 +8,16 @@
 ## Requirement
 - `Django 2.0.0` or higher
 - `Python 3.6` or higher
+- `MySQL` or `Mariadb` only
+
+## Dependency
+- [dj-database-url](https://github.com/kennethreitz/dj-database-url)
 
 ## Usage
-#### Setup
+#### If you want to use only shard
 ``` python
+# in settings.py
+
 DATABASES = ConfigHelper.database_configs(
     unshard = {
         'default': {
@@ -20,7 +26,7 @@ DATABASES = ConfigHelper.database_configs(
         },
     },
     shard = {
-        'SHARD_NAME': {
+        'SHARD_GROUP_A': {
             'shard_options': {
                 'database_name': 'product',
                 'logical_count': 4,
@@ -42,30 +48,105 @@ DATABASES = ConfigHelper.database_configs(
         },
     },
 )
-
+DATABASE_ROUTERS = ['shard.routers.specific.SpecificRouter', 'shard.routers.shard.ShardRouter']
 ```
-
-#### Model
 ``` python
+# in models.py
 class ShardModel(ShardMixin, models.Model):
     user_id = models.IntegerField(null=False, verbose_name='User Idx')
 
-    shard_group = 'SHARD_NAME'
+    shard_group = 'SHARD_GROUP_A'
     shard_key_name = 'user_id'
 ```
+- `shard_key` is supported only integer type.
 
-- Shard Key는 현재 Integer만 지원합니다.
+#### If you want to use shard_static together.
+``` python
+# in settings.py
 
-## Dependency
-- [dj-database-url](https://github.com/kennethreitz/dj-database-url)
+INSTALLED_APPS = [
+    # ...
+    'shard_static',
+]
 
-## TODO
+DATABASES = ConfigHelper.database_configs(
+    # ...
+)
 
-- 모든 샤드에 공유되는 Static데이터기능 구현
-- Example App 작성
-- 문서화
-- migration
+DATABASE_ROUTERS = ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter']
+SHARD_SYNC_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
+```
+``` python
+# in models.py
+class ExampleStaticModel(BaseShardStaticModel):
+    field1 = models.CharField(max_length=64, null=False)
+    field2 = models.CharField(max_length=64, null=False)
+```
 
+- Must includes `shard_static` at `INSTALLED_APPS`
+- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
+- Must use `shard_static.routers.ShardStaticRouter`
+    - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
+
+## Snippets
+We don't want to having dependency of celery and redis.  
+If you want to using `shard_static`, you refer to this.
+
+#### Supervisor for running syncer
+``` python
+@task  # celery
+def wrap_sync_static(model_name, database_alias):
+    sync_static_service.sync_static(model_name, database_alias)
+
+def run_sync_supervisor():
+    static_models = [
+        ShardStaticA,
+        ShardStaticAll,
+        # ...
+    ]
+
+    for static_model in static_models:
+        databases = get_master_databases_for_shard() \
+            if static_model.shard_group == ALL_SHARD_GROUP else \
+            get_master_databases_by_shard_group(static_model.shard_group)
+
+        for database in databases:
+            wrap_sync_static.delay(static_model._meta.label, database)
+```
+
+#### RedisLockManager
+``` python
+class RedisLockManager(BaseLockManager):
+    def get_connection():
+        return Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DATABASE)
+
+    def is_locked(self) -> bool:
+        conn = self.get_connection()
+        value = conn.get(self.key)
+        return value is not None
+
+    def lock(self) -> bool:
+        conn = self.get_connection()
+        return conn.set(self.key, self.uuid, ex=self.ttl, nx=True)
+
+    def ping(self) -> bool:
+        conn = self.get_connection()
+        return conn.expire(self.key, self.ttl)
+
+    def release(self) -> bool:
+        conn = self.get_connection()
+        return conn.delete(self.key)
+```
+
+## How to run test
+- Step 1: Run database for testing.  
+`make run-test-db`
+
+- Step 2: Run test.  
+`make test`
+
+- Step 3: When end of test, you stop to database.  
+`make stop-test-db`
 
 ## Prior art
 - https://github.com/JBKahn/django-sharding

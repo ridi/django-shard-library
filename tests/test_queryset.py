@@ -1,36 +1,81 @@
-from django.db import models
+# flake8: noqa: W0212  # pylint: disable=protected-access
 from django.test import TestCase
 
-from django_fake_model import models as f
-
-from shard.mixins import ShardMixin
 from shard.exceptions import RequireShardKeyException
-from shard.managers import ShardManager
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
+from tests.models import ShardModelA
 
 
-class FakeModel(f.FakeModel, ShardMixin):
-    user_id = models.IntegerField(verbose_name='유저 idx')
-
-    objects = ShardManager()
-
-    shard_group = 'product_shard'
-    shard_key_name = 'user_id'
-
-
-@FakeModel.fake_me
 class QuerysetTestCase(TestCase):
     def setUp(self):
-        self.shard_group = 'product_shard'
+        self.shard_group = 'shard_a'
 
-    def test_quertset(self):
-        qs_one = FakeModel.objects.filter(user_id=1)
-        qs_two = FakeModel.objects.filter(user_id=2)
+    def test_filter(self):
+        qs_one = ShardModelA.objects.filter(user_id=1)
+        qs_two = ShardModelA.objects.filter(user_id=2)
         self.assertEqual(get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=self.shard_group), qs_one.db)
         self.assertEqual(get_shard_by_shard_key_and_shard_group(shard_key=2, shard_group=self.shard_group), qs_two.db)
 
-        fix_shard = FakeModel.objects.shard(shard_key=100)
+        fix_shard = ShardModelA.objects.filter(user_id=100)
         self.assertEqual(get_shard_by_shard_key_and_shard_group(shard_key=100, shard_group=self.shard_group), fix_shard.db)
 
         with self.assertRaises(RequireShardKeyException):
-            print(FakeModel.objects.filter())
+            ShardModelA.objects.filter()
+
+    def test_get(self):
+        with self.assertRaises(RequireShardKeyException):
+            ShardModelA.objects.get()
+
+        with self.assertRaises(ShardModelA.DoesNotExist):  # pylint: disable=no-member
+            ShardModelA.objects.get(user_id=1)
+
+        try:
+            ShardModelA.objects.create(user_id=1)
+            obj = ShardModelA.objects.get(user_id=1)
+            obj.delete()
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
+            self.fail('ShardQuerySet get method is not normally.')
+
+    def test_create(self):
+        with self.assertRaises(RequireShardKeyException):
+            ShardModelA.objects.create()
+
+        try:
+            obj = ShardModelA.objects.create(user_id=3)
+            obj.delete()
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
+            self.fail('ShardQuerySet create method is not normally.')
+
+    def test_get_or_create(self):
+        with self.assertRaises(RequireShardKeyException):
+            ShardModelA.objects.get_or_create()
+
+        try:
+            obj, created = ShardModelA.objects.get_or_create(user_id=4)
+            obj_late, created_late = ShardModelA.objects.get_or_create(user_id=4)
+
+            self.assertEqual(obj.id, obj_late.id)
+            self.assertEqual(obj._state.db, obj_late._state.db)
+            self.assertTrue(created)
+            self.assertFalse(created_late)
+
+            obj.delete()
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
+            self.fail('ShardQuerySet get_or_create method is not normally.')
+
+    def test_update_or_create(self):
+        with self.assertRaises(RequireShardKeyException):
+            ShardModelA.objects.update_or_create()
+
+        try:
+            obj, created = ShardModelA.objects.update_or_create(user_id=3, defaults={'text': 'This is Text One'})
+            self.assertEqual(obj.text, 'This is Text One')
+            self.assertTrue(created)
+
+            obj, created = ShardModelA.objects.update_or_create(user_id=3, defaults={'text': 'This is Text Two'})
+            self.assertEqual(obj.text, 'This is Text Two')
+            self.assertFalse(created)
+
+            obj.delete()
+        except:  # flake8: noqa: E722  # pylint:disable=bare-except
+            self.fail('ShardQuerySet update_or_create method is not normally.')
