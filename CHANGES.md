@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.5 (Apr 7th 2018)
+------------------
+- Add new feature for shard static
+
 0.0.4 (Mar 30th 2018)
 ------------------
 - Test Travis Deploy
