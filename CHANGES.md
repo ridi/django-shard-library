@@ -1,6 +1,6 @@
 Changelog
 =========
-0.0.5 (Apr 7th 2018)
+0.0.5 (Apr 17th 2018)
 ------------------
 - Add new feature for shard static
 
