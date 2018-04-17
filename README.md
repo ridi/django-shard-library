@@ -89,7 +89,7 @@ class ExampleStaticModel(BaseShardStaticModel):
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
 ## Snippets
-We don't want to having dependency of celery and redis.  
+We don't want to have dependency of celery and redis.  
 If you want to using `shard_static`, you refer to this.
 
 #### Supervisor for running syncer
