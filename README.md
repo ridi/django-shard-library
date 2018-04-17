@@ -83,13 +83,13 @@ class ExampleStaticModel(BaseShardStaticModel):
     field2 = models.CharField(max_length=64, null=False)
 ```
 
-- Must includes `shard_static` at `INSTALLED_APPS`
+- Must includes `shard_static` to `INSTALLED_APPS`
 - Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
 ## Snippets
-We don't want to having dependency of celery and redis.  
+We don't want to have dependency of celery and redis.  
 If you want to using `shard_static`, you refer to this.
 
 #### Supervisor for running syncer
