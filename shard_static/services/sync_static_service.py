@@ -12,7 +12,7 @@ from shard_static import config
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException, \
     TooManySyncItemsException
-from shard_static.models import BaseShardStaticModel, StaticSyncStatus
+from shard_static.models import BaseShardStaticModel, BaseStaticSyncStatus
 from shard_static.services import lock_service
 
 logger = logging.getLogger('shard_static.services.sync_static_service')
@@ -39,18 +39,15 @@ def sync_static(model_name: str, database_alias: str):
 
 
 def _sync(model: Type[BaseShardStaticModel], database_alias: str):
-    sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias) \
-        .get_or_create(static_model_key=_make_sync_key(model=model))
-    origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
+    sync_status, _ = _get_status_model().objects.shard(shard=database_alias).get_or_create(static_model_key=_make_sync_key(model=model))
+    origin_data = model.get_origin_data(status=sync_status)
 
-    if origin_data.count() >= config.SHARD_SYNC_MAX_ITEMS:
+    if origin_data.count() >= config.SHARD_STATIC_SYNC_MAX_ITEMS:
         raise TooManySyncItemsException()
 
     with transaction.atomic(database_alias):
-        last_modified = None
         for _data in origin_data:
-            if not last_modified or last_modified < _data.last_modified:
-                last_modified = _data.last_modified
+            sync_status.record_status(_data)
 
             model.objects.shard(shard=database_alias).update_or_create(
                 id=_data.id,
@@ -59,11 +56,14 @@ def _sync(model: Type[BaseShardStaticModel], database_alias: str):
                 )
             )
 
-        sync_status.last_modified = last_modified
         sync_status.save()
 
 
-def _get_model(model_name: str) -> Type[BaseShardStaticModel]:
+def _get_status_model() -> Type[BaseStaticSyncStatus]:
+    return _get_model(config.SHARD_STATIC_SYNC_STATUS_MODEL)
+
+
+def _get_model(model_name: str):
     _splited = model_name.split('.')
     _label, _model_name = _splited[0], _splited[1]
 

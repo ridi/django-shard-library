@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.6(Apr 30th 2018)
+------------------
+- Change logic for shard-static sync
+
 0.0.5 (Apr 17th 2018)
 ------------------
 - Add new feature for shard static
