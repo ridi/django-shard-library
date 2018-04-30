@@ -1,3 +1,4 @@
+# pylint: disable=too-many-return-statements
 from typing import Optional
 
 from django.apps import apps
