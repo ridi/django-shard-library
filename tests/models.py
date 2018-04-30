@@ -15,7 +15,7 @@ class StaticSyncStatus(BaseStaticSyncStatus):
             self.last_modified = shard_static_model.last_modified
 
 
-class ShardStaticAll(BaseShardStaticModel, models.Model):
+class ShardStaticAll(BaseShardStaticModel):
     last_modified = models.DateTimeField(null=False, auto_now=True,)
     @classmethod
     def get_origin_data(cls, status):
@@ -25,7 +25,7 @@ class ShardStaticAll(BaseShardStaticModel, models.Model):
         return cls.objects.filter(last_modified__gt=status.last_modified)
 
 
-class ShardStaticA(BaseShardStaticModel, models.Model):
+class ShardStaticA(BaseShardStaticModel):
     last_modified = models.DateTimeField(null=False, auto_now=True,)
     shard_group = 'shard_a'
 
@@ -37,7 +37,7 @@ class ShardStaticA(BaseShardStaticModel, models.Model):
         return cls.objects.filter(last_modified__gt=status.last_modified)
 
 
-class ShardStaticB(BaseShardStaticModel, models.Model):
+class ShardStaticB(BaseShardStaticModel):
     last_modified = models.DateTimeField(null=False, auto_now=True,)
 
     shard_group = 'shard_b'
