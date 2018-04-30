@@ -1,7 +1,7 @@
 from django.db import models
 
 from shard_static.constants import ALL_SHARD_GROUP
-from shard_static.managers import ShardStaticManager
+from shard_static.managers import ShardStaticManager, ShardStaticStatusManager
 from shard_static.mixins import ShardStaticMixin
 
 
@@ -9,7 +9,7 @@ class BaseStaticSyncStatus(models.Model):
     static_model_key = models.CharField(max_length=64, unique=True, verbose_name='Static Model Key')
 
     shard_group = ALL_SHARD_GROUP
-    objects = ShardStaticManager()
+    objects = ShardStaticStatusManager()
 
     class Meta:
         abstract = True
