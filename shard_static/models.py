@@ -13,7 +13,6 @@ class BaseStaticSyncStatus(ShardStaticMixin, models.Model):
 
     class Meta:
         abstract = True
-        db_table = 'static_sync_status'
 
     def set_revision(self, shard_static_model):
         raise NotImplementedError
