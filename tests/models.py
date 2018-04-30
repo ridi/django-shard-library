@@ -17,6 +17,7 @@ class StaticSyncStatus(BaseStaticSyncStatus):
 
 class ShardStaticAll(BaseShardStaticModel):
     last_modified = models.DateTimeField(null=False, auto_now=True,)
+
     @classmethod
     def get_origin_data(cls, status):
         if status.last_modified is None:
