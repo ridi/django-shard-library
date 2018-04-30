@@ -1,14 +1,14 @@
 from django.db import models
 
+from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.managers import ShardStaticManager
 from shard_static.mixins import ShardStaticMixin
 
 
-class BaseStaticSyncStatus(ShardStaticMixin, models.Model):
+class BaseStaticSyncStatus(models.Model):
     static_model_key = models.CharField(max_length=64, unique=True, verbose_name='Static Model Key')
 
-    diffusible = False
-
+    shard_group = ALL_SHARD_GROUP
     objects = ShardStaticManager()
 
     class Meta:
