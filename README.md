@@ -82,7 +82,7 @@ SHARD_STATIC_SYNC_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
 class StaticSyncStatus(BaseStaticSyncStatus):
     last_modified = models.DateTimeField(null=True)
 
-    def set_revision(self, shard_static_model):
+    def record_status(self, shard_static_model):
         # Must impolement your rules
         # Example
         if self.last_modified is None or self.last_modified < shard_static_model.last_modified:
@@ -109,7 +109,7 @@ class ExampleStaticModel(BaseShardStaticModel):
 - Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
-- Must implement `set_revision` in `BaseStaticSyncStatus` and `get_origin_data` in `BaseShardStaticModel`
+- Must implement `record_status` in `BaseStaticSyncStatus` and `get_origin_data` in `BaseShardStaticModel`
 
 ## Snippets
 We don't want to have dependency of celery and redis.  

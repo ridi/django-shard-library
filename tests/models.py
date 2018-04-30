@@ -10,7 +10,7 @@ from shard_static.models import BaseShardStaticModel, BaseStaticSyncStatus
 class StaticSyncStatus(BaseStaticSyncStatus):
     last_modified = models.DateTimeField(null=True)
 
-    def set_revision(self, shard_static_model):
+    def record_status(self, shard_static_model):
         if self.last_modified is None or self.last_modified < shard_static_model.last_modified:
             self.last_modified = shard_static_model.last_modified
 

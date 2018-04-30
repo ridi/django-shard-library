@@ -14,7 +14,7 @@ class BaseStaticSyncStatus(models.Model):
     class Meta:
         abstract = True
 
-    def set_revision(self, shard_static_model):
+    def record_status(self, shard_static_model):
         raise NotImplementedError
 
 

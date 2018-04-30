@@ -47,7 +47,7 @@ def _sync(model: Type[BaseShardStaticModel], database_alias: str):
 
     with transaction.atomic(database_alias):
         for _data in origin_data:
-            sync_status.set_revision(_data)
+            sync_status.record_status(_data)
 
             model.objects.shard(shard=database_alias).update_or_create(
                 id=_data.id,
