@@ -74,19 +74,42 @@ DATABASES = ConfigHelper.database_configs(
 )
 
 DATABASE_ROUTERS = ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter']
-SHARD_SYNC_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
+SHARD_STATIC_SYNC_STATUS_MODEL = '{your_app_label}.StaticSyncStatus',
+SHARD_STATIC_SYNC_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
 ```
 ``` python
 # in models.py
+class StaticSyncStatus(BaseStaticSyncStatus):
+    last_modified = models.DateTimeField(null=True)
+
+    def set_revision(self, shard_static_model):
+        # Must impolement your rules
+        # Example
+        if self.last_modified is None or self.last_modified < shard_static_model.last_modified:
+            self.last_modified = shard_static_model.last_modified
+
+
 class ExampleStaticModel(BaseShardStaticModel):
     field1 = models.CharField(max_length=64, null=False)
     field2 = models.CharField(max_length=64, null=False)
+
+    last_modified = models.DateTimeField(null=False, auto_now=True)
+
+    @classmethod
+    def get_origin_data(cls, status):
+        # Must impolement your rules
+        # Example
+        if status.last_modified is None:
+            return self.objects.all()
+
+        return cls.objects.filter(last_modifiec__gt = status.last_modified)
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
 - Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
+- Must implement `set_revision` in `BaseStaticSyncStatus` and `get_origin_data` in `BaseShardStaticModel`
 
 ## Snippets
 We don't want to have dependency of celery and redis.  
