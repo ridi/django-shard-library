@@ -3,6 +3,7 @@ Changelog
 0.0.6 (May 2nd 2018)
 ------------------
 - Fix incorrect structure for StaticSyncStatus
+- Remove ALL_SHARD_GROUP and logic for it
 
 0.0.5 (Apr 17th 2018)
 ------------------
@@ -28,5 +29,5 @@ Changelog
 ------------------
 
 ### Register New Package
-- Addition of initial functions related to sharding.
+- Addition of initial functions related to sharding
     - shardmodel, read-replica routing, etc...
