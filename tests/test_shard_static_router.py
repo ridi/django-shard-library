@@ -4,6 +4,7 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
+from shard_static.exceptions import DontLinkException
 from shard_static.routers import ShardStaticRouter
 from tests.models import ShardModelA, NormalModel, ShardModelB, ShardStaticAll, ShardStaticA, ShardStaticB
 
@@ -68,11 +69,14 @@ class ShardStaticRouterTestCase(TestCase):
 
         normal_object = G(NormalModel)
 
-        self.assertTrue(self.router.allow_relation(normal_object, shard_all_static))
-        self.assertTrue(self.router.allow_relation(normal_object, shard_a_static))
-        self.assertFalse(self.router.allow_relation(normal_object, shard_b_static))
+        with self.assertRaises(DontLinkException):
+            self.router.allow_relation(normal_object, shard_all_static)
 
-        self.assertFalse(shard_b_static.diffusible)
+        with self.assertRaises(DontLinkException):
+            self.router.allow_relation(normal_object, shard_a_static)
+
+        with self.assertRaises(DontLinkException):
+            self.router.allow_relation(normal_object, shard_b_static)
 
         # delete instance for isolation test
         shard_b_static.delete()
