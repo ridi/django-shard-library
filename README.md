@@ -101,14 +101,11 @@ def wrap_sync_static(model_name, database_alias):
 def run_sync_supervisor():
     static_models = [
         ShardStaticA,
-        ShardStaticAll,
         # ...
     ]
 
     for static_model in static_models:
-        databases = get_master_databases_for_shard() \
-            if static_model.shard_group == ALL_SHARD_GROUP else \
-            get_master_databases_by_shard_group(static_model.shard_group)
+        databases = get_master_databases_by_shard_group(static_model.shard_group)
 
         for database in databases:
             wrap_sync_static.delay(static_model._meta.label, database)

@@ -8,7 +8,6 @@ from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.mixins import ShardMixin
 from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group, get_shard_by_instance
-from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import DontLinkException
 from shard_static.mixins import ShardStaticMixin
 from shard_static.models import StaticSyncStatus
@@ -27,7 +26,7 @@ class ShardStaticRouter(BaseReplicationRouter):
 
         if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
             # obj1 and obj2 are for shard
-            return obj1.shard_group == obj2.shard_group or obj1.shard_group == ALL_SHARD_GROUP or obj2.shard_group == ALL_SHARD_GROUP
+            return obj1.shard_group == obj2.shard_group
 
         if (isinstance(obj1, (ShardMixin, ShardStaticMixin)) and not isinstance(obj2, (ShardMixin, ShardStaticMixin))) or \
                 (not isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin))):
@@ -65,13 +64,11 @@ class ShardStaticRouter(BaseReplicationRouter):
         if issubclass(model, StaticSyncStatus):
             if db == DEFAULT_DATABASE or shard_group_for_db is None:
                 return False
-            elif model.shard_group == ALL_SHARD_GROUP:
+            else:
                 return True
 
         if issubclass(model, ShardStaticMixin):
-            if model.shard_group == ALL_SHARD_GROUP and (db == DEFAULT_DATABASE or shard_group_for_db):
-                return True
-            elif model.diffusible and db == DEFAULT_DATABASE:
+            if model.diffusible and db == DEFAULT_DATABASE:
                 return True
 
         return shard_group_for_db == model.shard_group

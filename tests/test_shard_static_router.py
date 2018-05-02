@@ -6,7 +6,7 @@ from django_dynamic_fixture import G
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from shard_static.exceptions import DontLinkException
 from shard_static.routers import ShardStaticRouter
-from tests.models import ShardModelA, NormalModel, ShardModelB, ShardStaticAll, ShardStaticA, ShardStaticB
+from tests.models import ShardModelA, NormalModel, ShardModelB, ShardStaticA, ShardStaticB
 
 
 class ShardStaticRouterTestCase(TestCase):
@@ -51,26 +51,18 @@ class ShardStaticRouterTestCase(TestCase):
         shard_a_obj1 = G(ShardModelA, user_id=1)
         shard_b_obj1 = G(ShardModelB, user_id=1)
 
-        shard_all_static = G(ShardStaticAll)
         shard_a_static = G(ShardStaticA)
 
         self.assertTrue(self.router.allow_relation(shard_a_obj1, shard_a_static))
         self.assertFalse(self.router.allow_relation(shard_b_obj1, shard_a_static))
 
-        self.assertTrue(self.router.allow_relation(shard_a_obj1, shard_all_static))
-        self.assertTrue(self.router.allow_relation(shard_b_obj1, shard_all_static))
-
     def test_allow_relation_with_a_normal_object_and_a_static_object(self):
-        shard_all_static = G(ShardStaticAll)
         shard_a_static = G(ShardStaticA)
         shard_b_static = ShardStaticB.objects.shard(
             get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
         ).create(last_modified=datetime.now())
 
         normal_object = G(NormalModel)
-
-        with self.assertRaises(DontLinkException):
-            self.router.allow_relation(normal_object, shard_all_static)
 
         with self.assertRaises(DontLinkException):
             self.router.allow_relation(normal_object, shard_a_static)
@@ -82,14 +74,11 @@ class ShardStaticRouterTestCase(TestCase):
         shard_b_static.delete()
 
     def test_allow_relation_with_two_static_objects(self):
-        shard_all_static = G(ShardStaticAll)
         shard_a_static = G(ShardStaticA)
         shard_b_static = ShardStaticB.objects.shard(
             get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
         ).create(last_modified=datetime.now())
 
-        self.assertTrue(self.router.allow_relation(shard_a_static, shard_all_static))
-        self.assertTrue(self.router.allow_relation(shard_b_static, shard_all_static))
         self.assertFalse(self.router.allow_relation(shard_a_static, shard_b_static))
 
         # delete instance for isolation test
