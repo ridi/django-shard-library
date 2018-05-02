@@ -1,3 +1,4 @@
+# pylint: disable=too-many-return-statements
 from typing import Optional
 
 from django.apps import apps
@@ -9,6 +10,7 @@ from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group, get_shard_by_instance
 from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.mixins import ShardStaticMixin
+from shard_static.models import StaticSyncStatus
 
 
 class ShardStaticRouter(BaseReplicationRouter):
@@ -16,6 +18,9 @@ class ShardStaticRouter(BaseReplicationRouter):
         super_allow_relation = super().allow_relation(obj1, obj2, **hints)
         if super_allow_relation is not None:
             return super_allow_relation
+
+        if isinstance(obj1, StaticSyncStatus) or isinstance(obj2, StaticSyncStatus):
+            return False
 
         if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
             return obj1.shard_group == obj2.shard_group or obj1.shard_group == ALL_SHARD_GROUP or obj2.shard_group == ALL_SHARD_GROUP
@@ -47,10 +52,16 @@ class ShardStaticRouter(BaseReplicationRouter):
             model = app.get_model(model_name)
 
         shard_group_for_db = settings.DATABASES[db].get(DATABASE_CONFIG_SHARD_GROUP, None)
-        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
+        if not issubclass(model, (ShardMixin, ShardStaticMixin, StaticSyncStatus)):
             if shard_group_for_db:
                 return False
             return None
+
+        if issubclass(model, StaticSyncStatus):
+            if db == DEFAULT_DATABASE or shard_group_for_db is None:
+                return False
+            elif model.shard_group == ALL_SHARD_GROUP:
+                return True
 
         if issubclass(model, ShardStaticMixin):
             if model.shard_group == ALL_SHARD_GROUP and (db == DEFAULT_DATABASE or shard_group_for_db):
