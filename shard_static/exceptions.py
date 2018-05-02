@@ -18,3 +18,11 @@ class NotExistsOriginalDataException(Exception):
 
 class TooManySyncItemsException(Exception):
     pass
+
+
+class DontExecuteException(Exception):
+    pass
+
+
+class DontLinkException(Exception):
+    pass

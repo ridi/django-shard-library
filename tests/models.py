@@ -8,10 +8,6 @@ from shard.models import TableStrategyModel
 from shard_static.models import BaseShardStaticModel
 
 
-class ShardStaticAll(BaseShardStaticModel, models.Model):
-    pass
-
-
 class ShardStaticA(BaseShardStaticModel, models.Model):
     shard_group = 'shard_a'
 

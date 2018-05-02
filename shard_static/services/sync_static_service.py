@@ -9,7 +9,6 @@ from django.forms import model_to_dict
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
 from shard_static import config
-from shard_static.constants import ALL_SHARD_GROUP
 from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException, \
     TooManySyncItemsException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
@@ -88,7 +87,7 @@ def _validate_database(model: Type[BaseShardStaticModel], database_alias: str):
         raise InvalidDatabaseAliasException()
 
     databases = get_master_databases_by_shard_group(shard_group=model.shard_group)
-    if model.shard_group != ALL_SHARD_GROUP and database_alias not in databases:
+    if database_alias not in databases:
         raise InvalidDatabaseAliasException()
 
 
