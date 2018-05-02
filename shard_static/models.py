@@ -17,7 +17,7 @@ class StaticSyncStatus(models.Model):
 
 
 class BaseShardStaticModel(ShardStaticMixin, models.Model):
-    last_modified = models.DateTimeField(null=False, auto_now=True, verbose_name='Last Modified', )
+    last_modified = models.DateTimeField(auto_now=True, db_index=True, verbose_name='Last Modified', )
 
     objects = ShardStaticManager()
 
