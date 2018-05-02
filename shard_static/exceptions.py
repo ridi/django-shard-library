@@ -22,3 +22,7 @@ class TooManySyncItemsException(Exception):
 
 class DontExecuteException(Exception):
     pass
+
+
+class DontLinkException(Exception):
+    pass
