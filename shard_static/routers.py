@@ -64,8 +64,7 @@ class ShardStaticRouter(BaseReplicationRouter):
         if issubclass(model, StaticSyncStatus):
             if db == DEFAULT_DATABASE or shard_group_for_db is None:
                 return False
-            else:
-                return True
+            return True
 
         if issubclass(model, ShardStaticMixin):
             if model.diffusible and db == DEFAULT_DATABASE:
