@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.6 (May 2nd 2018)
+------------------
+- Fix incorrect structure for StaticSyncStatus
+
 0.0.5 (Apr 17th 2018)
 ------------------
 - Add new feature for shard static
