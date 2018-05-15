@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.9 (May 15th 2018)
+-------------------
+- Fix bug for sync logic
+
 0.0.8 (May 15th 2018)
 -------------------
 - Fix bug
