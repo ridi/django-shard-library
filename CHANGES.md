@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.8 (May 15th 2018)
+-------------------
+- Fix bug
+
 0.0.7 (May 15th 2018)
 -------------------
 - Repurpose config.SHARD_SYNC_MAX_ITEMS
