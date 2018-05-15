@@ -96,7 +96,7 @@ If you want to using `shard_static`, you refer to this.
 ``` python
 @task  # celery
 def wrap_sync_static(model_name, database_alias):
-    sync_static_service.sync_static(model_name, database_alias)
+    sync_static_service.run_sync_with_lock(model_name, database_alias)
 
 def run_sync_supervisor():
     static_models = [
