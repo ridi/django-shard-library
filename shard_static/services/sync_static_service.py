@@ -50,7 +50,7 @@ def run_sync(model_name: str, database_alias: str):
 
         if sync_status.last_modified != last_modified:
             sync_status.last_modified = last_modified
-            sync_status.save()
+            sync_status.save(using=database_alias)
             return
 
         offset += limit
