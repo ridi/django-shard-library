@@ -3,23 +3,20 @@
 from django.test import TestCase
 from django_dynamic_fixture import G
 
-from shard.constants import DEFAULT_DATABASE
-from shard.utils.database import get_master_databases_by_shard_group, get_master_databases_for_shard
+from shard.utils.database import get_master_databases_by_shard_group
 from shard_static.exceptions import InvalidDatabaseAliasException, NotShardStaticException
 from shard_static.services import sync_static_service
 from tests.models import ShardStaticA, ShardStaticB
 
 
 class SyncStaticServiceTestCase(TestCase):
-    # 같은 shard_group의 db가 아닐때
-
     def test_sync_success_with_shard_a_only(self):
         _objs = [G(ShardStaticA) for _ in range(10)]
         databases = get_master_databases_by_shard_group(shard_group=ShardStaticA.shard_group, clear=True)
 
         try:
             for db in databases:
-                sync_static_service.sync_static('tests.ShardStaticA', db)
+                sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
         except:  # flake8: noqa: E722  # pylint:disable=bare-except
             self.fail('sync_static is fail')
 
@@ -35,10 +32,10 @@ class SyncStaticServiceTestCase(TestCase):
 
         with self.assertRaises(InvalidDatabaseAliasException):
             for db in databases:
-                sync_static_service.sync_static('tests.ShardStaticA', db)
+                sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
 
     def test_sync_failure_with_normal_model(self):
         database = get_master_databases_by_shard_group(shard_group=ShardStaticB.shard_group, clear=True)[0]
 
         with self.assertRaises(NotShardStaticException):
-            sync_static_service.sync_static('tests.NormalModel', database)
+            sync_static_service.run_sync_with_lock('tests.NormalModel', database)

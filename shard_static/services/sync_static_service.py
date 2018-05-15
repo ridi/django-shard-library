@@ -1,5 +1,6 @@
 import logging
-from typing import Optional, Type
+from datetime import datetime
+from typing import Optional, Type, List
 
 from django.apps import apps
 from django.conf import settings
@@ -9,45 +10,51 @@ from django.forms import model_to_dict
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
 from shard_static import config
-from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException, \
-    TooManySyncItemsException
+from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticSyncStatus
 from shard_static.services import lock_service
 
 logger = logging.getLogger('shard_static.services.sync_static_service')
 
 
-def sync_static(model_name: str, database_alias: str):
-    model = _get_model(model_name=model_name)
-
-    _validate_model(model)
-    _validate_database(model, database_alias)
-
+def run_sync_with_lock(model_name: str, database_alias: str):
     lock_manager = lock_service.get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
         logger.info(f'Already exists processing - {model_name}, {database_alias}')
 
     try:
-        _sync(model=model, database_alias=database_alias)
-    except TooManySyncItemsException:
-        logger.warning(f'[WARNING] {model_name}:{database_alias} greater than or equal to MAX_ITEMS')
-    except:  # flake8: noqa: E722 pylint: disable=bare-except
-        logger.exception(f'[EXCEPTION] {model_name}:{database_alias} raise exceptions while syncing')
+        run_sync(model_name=model_name, database_alias=database_alias)
     finally:
         lock_manager.release()
 
 
-def _sync(model: Type[BaseShardStaticModel], database_alias: str):
-    sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias) \
-        .get_or_create(static_model_key=_make_sync_key(model=model))
-    origin_data = model.objects.find_by_last_modified(last_modified=sync_status.last_modified)
+def run_sync(model_name: str, database_alias: str):
+    model = _get_model(model_name=model_name)
 
-    if origin_data.count() >= config.SHARD_SYNC_MAX_ITEMS:
-        raise TooManySyncItemsException()
+    _validate_model(model)
+    _validate_database(model, database_alias)
 
+    sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias).get_or_create(static_model_key=_make_sync_key(model=model))
+
+    offset = 0
+    limit = config.SHARD_SYNC_MAX_ITEMS
+    while True:
+        source_items = model.objects.find_by_last_modified(last_modified=sync_status.last_modified, offset=offset, limit=limit)
+
+        last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
+
+        if sync_status.last_modified != last_modified:
+            sync_status.last_modified = last_modified
+            sync_status.save()
+            return
+
+        offset += limit
+
+
+def _insert_items(items: List, model: Type[BaseShardStaticModel], database_alias) -> datetime:
+    last_modified = None
     with transaction.atomic(database_alias):
-        last_modified = None
-        for _data in origin_data:
+        for _data in items:
             if not last_modified or last_modified < _data.last_modified:
                 last_modified = _data.last_modified
 
@@ -58,8 +65,7 @@ def _sync(model: Type[BaseShardStaticModel], database_alias: str):
                 )
             )
 
-        sync_status.last_modified = last_modified
-        sync_status.save()
+    return last_modified
 
 
 def _get_model(model_name: str) -> Type[BaseShardStaticModel]:

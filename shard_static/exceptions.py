@@ -16,10 +16,6 @@ class NotExistsOriginalDataException(Exception):
     pass
 
 
-class TooManySyncItemsException(Exception):
-    pass
-
-
 class DontExecuteException(Exception):
     pass
 
