@@ -47,7 +47,7 @@ def run_sync(model_name: str, database_alias: str):
         )
 
         if source_items.count() == 0:
-            logger.debug(f'Source Items Count: 0')
+            logger.debug('Source Items Count: 0')
             return
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
