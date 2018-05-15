@@ -41,6 +41,10 @@ def run_sync(model_name: str, database_alias: str):
     limit = config.SHARD_SYNC_MAX_ITEMS
     while True:
         source_items = model.objects.find_by_last_modified(last_modified=sync_status.last_modified, offset=offset, limit=limit)
+        logger.debug(
+            f'[Load source items] - last_modified: {sync_status.last_modified}, offset: {offset}, limit: {limit}',
+            extra={'offset': offset, 'limit': limit, 'last_modified':sync_status.last_modified}
+        )
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
 
