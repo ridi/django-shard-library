@@ -40,5 +40,5 @@ class ShardStaticManager(BaseShardManager):
     update_or_create = _wrap_for_static('update_or_create')
 
     def find_by_last_modified(self, last_modified: Optional[datetime], offset: int, limit: int):
-        qs = self.filter(last_modified__gte=last_modified)
+        qs = self.filter(last_modified__gte=last_modified).order_by('last_modified')
         return qs[offset:offset + limit]
