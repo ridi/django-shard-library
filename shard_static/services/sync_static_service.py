@@ -21,6 +21,7 @@ def run_sync_with_lock(model_name: str, database_alias: str):
     lock_manager = lock_service.get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
         logger.info(f'Already exists processing - {model_name}, {database_alias}')
+        return
 
     try:
         run_sync(model_name=model_name, database_alias=database_alias)
