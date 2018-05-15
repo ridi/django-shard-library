@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 from django.db import models
 
@@ -7,7 +7,7 @@ from shard_static.mixins import ShardStaticMixin
 
 
 def get_first_day() -> datetime:
-    return datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return datetime(1970, 1, 1)
 
 
 # Don't link StaticSyncStatus and other model.
