@@ -43,8 +43,12 @@ def run_sync(model_name: str, database_alias: str):
         source_items = model.objects.find_by_last_modified(last_modified=sync_status.last_modified, offset=offset, limit=limit)
         logger.debug(
             f'[Load source items] - last_modified: {sync_status.last_modified}, offset: {offset}, limit: {limit}',
-            extra={'offset': offset, 'limit': limit, 'last_modified':sync_status.last_modified}
+            extra={'offset': offset, 'limit': limit, 'last_modified': sync_status.last_modified}
         )
+
+        if source_items.count() == 0:
+            logger.debug(f'Source Items Count: 0')
+            return
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
 
