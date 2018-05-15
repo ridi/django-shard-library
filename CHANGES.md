@@ -1,5 +1,11 @@
 Changelog
 =========
+0.0.7 (May 15th 2018)
+-------------------
+- Repurpose config.SHARD_SYNC_MAX_ITEMS
+- Change run_sync_with_lock arguments to the same with run_sync
+- Improve sync logic
+
 0.0.6 (May 2nd 2018)
 ------------------
 - Fix incorrect structure for StaticSyncStatus
