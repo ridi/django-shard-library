@@ -18,6 +18,11 @@
 ``` python
 # in settings.py
 
+INSTALLED_APPS = [
+    # ...
+    'shard',
+]
+
 DATABASES = ConfigHelper.generate_database_configs(
     unshard = {
         'default': {
@@ -66,6 +71,7 @@ class ShardModel(ShardMixin, models.Model):
 
 INSTALLED_APPS = [
     # ...
+    'shard',
     'shard_static',
 ]
 
