@@ -84,7 +84,7 @@ class ExampleStaticModel(BaseShardStaticModel):
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
-- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
+- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS` if you use `run_sync_with_lock`.
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
