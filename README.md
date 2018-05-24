@@ -18,7 +18,7 @@
 ``` python
 # in settings.py
 
-DATABASES = ConfigHelper.database_configs(
+DATABASES = ConfigHelper.generate_database_configs(
     unshard = {
         'default': {
             'master': 'mysql://user:pwd@host/metadata',
@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     'shard_static',
 ]
 
-DATABASES = ConfigHelper.database_configs(
+DATABASES = ConfigHelper.generate_database_configs(
     # ...
 )
 

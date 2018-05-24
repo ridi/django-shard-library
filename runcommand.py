@@ -8,7 +8,7 @@ from shard.config.helper import ConfigHelper
 SETTINGS_DICT = {
     'DEBUG': True,
     'USE_TZ': True,
-    'DATABASES': ConfigHelper.database_configs(
+    'DATABASES': ConfigHelper.generate_database_configs(
         unshard={
             'default': {
                 'master': 'mysql://root:root@127.0.0.1/default?sql_mode=STRICT_TRANS_TABLES&charset=utf8',
