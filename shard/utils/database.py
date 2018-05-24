@@ -1,17 +1,37 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from django.conf import settings
 
-from shard.utils.memorize import memorize
 from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
+from shard.utils.memorize import memorize
 
 __all__ = (
-    'get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group', 'get_slave_databases_by_master',
+    'get_shard_groups', 'get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group',
+    'get_slave_databases_by_master',
 )
 
 
 @memorize
-def get_master_databases(without_shard: bool = True) -> List:
+def get_shard_groups() -> List[str]:
+    databases = _get_databases()
+    groups = []
+
+    for key, config in databases.items():
+        if config.get(DATABASE_CONFIG_MASTER):
+            continue
+
+        if config.get(DATABASE_CONFIG_SHARD_GROUP) is None or config.get(DATABASE_CONFIG_SHARD_NUMBER) is None:
+            continue
+
+        if key in groups:
+            continue
+
+        groups.append(config.get(DATABASE_CONFIG_SHARD_GROUP))
+    return groups
+
+
+@memorize
+def get_master_databases(without_shard: bool = True) -> List[str]:
     databases = _get_databases()
     result = []
 
@@ -29,7 +49,7 @@ def get_master_databases(without_shard: bool = True) -> List:
 
 
 @memorize
-def get_master_databases_for_shard() -> List:
+def get_master_databases_for_shard() -> List[str]:
     databases = _get_databases()
     shards = []
 
@@ -49,7 +69,7 @@ def get_master_databases_for_shard() -> List:
 
 
 @memorize
-def get_master_databases_by_shard_group(shard_group: str) -> List:
+def get_master_databases_by_shard_group(shard_group: str) -> List[str]:
     databases = _get_databases()
     shards = []
 
@@ -68,7 +88,7 @@ def get_master_databases_by_shard_group(shard_group: str) -> List:
 
 
 @memorize
-def get_slave_databases_by_master(master: str) -> List:
+def get_slave_databases_by_master(master: str) -> List[str]:
     result = []
     for key, config in _get_databases().items():
         _master = config.get(DATABASE_CONFIG_MASTER, None)

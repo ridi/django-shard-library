@@ -25,6 +25,12 @@ class ConHashPool:
     def get_node_pos(self, hash_value: int) -> int:
         return self._get_node_pos(hash_value=hash_value, min_pos=0, max_pos=self._ring_length - 1)
 
+    def make_ring(self):
+        for index, node in enumerate(self._nodes):
+            self._make_ring_for_node(node=node, node_index=index, replica=self._replica)
+
+        self._ring.sort(key=lambda x: x.hash_value)
+
     def _get_node_pos(self, hash_value: int, min_pos: int, max_pos: int):
         if self._ring[min_pos].hash_value >= hash_value or \
                 self._ring[max_pos].hash_value < hash_value or \
@@ -36,12 +42,6 @@ class ConHashPool:
             return self._get_node_pos(hash_value=hash_value, min_pos=mid_pos + 1, max_pos=max_pos)
 
         return self._get_node_pos(hash_value=hash_value, min_pos=min_pos, max_pos=mid_pos)
-
-    def make_ring(self):
-        for index, node in enumerate(self._nodes):
-            self._make_ring_for_node(node=node, node_index=index, replica=self._replica)
-
-        self._ring.sort(key=lambda x: x.hash_value)
 
     def _make_ring_for_node(self, node: str, node_index: int, replica: int):
         _hash_index = 0

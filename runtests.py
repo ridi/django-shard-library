@@ -59,6 +59,7 @@ SETTINGS_DICT = {
         'django.contrib.contenttypes',
         'django.contrib.sites',
         'tests',
+        'shard',
         'shard_static',
     ],
     'DATABASE_ROUTERS': ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter'],
