@@ -42,10 +42,10 @@ def run_sync(model_name: str, database_alias: str):
     offset = 0
     limit = config.SHARD_SYNC_MAX_ITEMS
     while True:
-        source_items = model.objects.find_by_last_modified(last_modified=sync_status.last_modified, offset=offset, limit=limit)
+        source_items = model.objects.find_by_last_modified(last_modified=sync_status.criterion_datetime, offset=offset, limit=limit)
         logger.debug(
-            f'[Load source items] - last_modified: {sync_status.last_modified}, offset: {offset}, limit: {limit}',
-            extra={'offset': offset, 'limit': limit, 'last_modified': sync_status.last_modified}
+            f'[Load source items] - criterion_datetime: {sync_status.criterion_datetime}, offset: {offset}, limit: {limit}',
+            extra={'offset': offset, 'limit': limit, 'criterion_datetime': sync_status.criterion_datetime}
         )
 
         if source_items.count() == 0:
@@ -54,8 +54,8 @@ def run_sync(model_name: str, database_alias: str):
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
 
-        if sync_status.last_modified != last_modified:
-            sync_status.last_modified = last_modified
+        if sync_status.criterion_datetime != last_modified:
+            sync_status.criterion_datetime = last_modified
             sync_status.save(using=database_alias)
             return
 
