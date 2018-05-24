@@ -4,7 +4,6 @@ from typing import Optional, Type, List
 
 from django.apps import apps
 from django.conf import settings
-from django.db import transaction
 from django.forms import model_to_dict
 
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
@@ -15,6 +14,9 @@ from shard_static.models import BaseShardStaticModel, StaticSyncStatus
 from shard_static.services import lock_service
 
 logger = logging.getLogger('shard_static.services.sync_static_service')
+
+
+_BATCH_SIZE = 1000
 
 
 def run_sync_with_lock(model_name: str, database_alias: str):
@@ -40,10 +42,10 @@ def run_sync(model_name: str, database_alias: str):
     offset = 0
     limit = config.SHARD_SYNC_MAX_ITEMS
     while True:
-        source_items = model.objects.find_by_last_modified(last_modified=sync_status.last_modified, offset=offset, limit=limit)
+        source_items = model.objects.find_by_last_modified(last_modified=sync_status.criterion_datetime, offset=offset, limit=limit)
         logger.debug(
-            f'[Load source items] - last_modified: {sync_status.last_modified}, offset: {offset}, limit: {limit}',
-            extra={'offset': offset, 'limit': limit, 'last_modified': sync_status.last_modified}
+            f'[Load source items] - criterion_datetime: {sync_status.criterion_datetime}, offset: {offset}, limit: {limit}',
+            extra={'offset': offset, 'limit': limit, 'criterion_datetime': sync_status.criterion_datetime}
         )
 
         if source_items.count() == 0:
@@ -52,27 +54,36 @@ def run_sync(model_name: str, database_alias: str):
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
 
-        if sync_status.last_modified != last_modified:
-            sync_status.last_modified = last_modified
+        if sync_status.criterion_datetime != last_modified:
+            sync_status.criterion_datetime = last_modified
             sync_status.save(using=database_alias)
             return
 
         offset += limit
 
 
-def _insert_items(items: List, model: Type[BaseShardStaticModel], database_alias) -> datetime:
+def _insert_items(items: List, model: Type[BaseShardStaticModel], database_alias: str) -> datetime:
     last_modified = None
-    with transaction.atomic(database_alias):
-        for _data in items:
-            if not last_modified or last_modified < _data.last_modified:
-                last_modified = _data.last_modified
+    exist_item_ids = model.objects.shard(shard=database_alias).filter(id__in=[item.id for item in items]).values_list('id', flat=True)
 
-            model.objects.shard(shard=database_alias).update_or_create(
-                id=_data.id,
-                defaults=model_to_dict(
-                    _data, fields=[field.name for field in _data._meta.fields]  # flake8: noqa: W0212 pylint: disable=protected-access
-                )
+    entities = []
+    for item in items:
+        if not last_modified or last_modified < item.last_modified:
+            last_modified = item.last_modified
+
+        if item.id in exist_item_ids:
+            data = model_to_dict(
+                item, fields=[field.name for field in item._meta.fields]  # flake8: noqa: W0212 pylint: disable=protected-access
             )
+
+            logger.debug(f'[Insert items] Update {item.id}')
+            model.objects.shard(shard=database_alias).filter(id=item.id).update(**data)
+        else:
+            entities.append(item)
+
+    if entities:
+        logger.debug(f'[Insert items] Bulk Create {len(entities)}')
+        model.objects.shard(shard=database_alias).bulk_create(entities, _BATCH_SIZE)
 
     return last_modified
 

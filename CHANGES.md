@@ -1,5 +1,13 @@
 Changelog
 =========
+0.0.10 (May 24th 2018)
+-------------------
+- The shard logic is made to use of consistent hash.
+- Remove transaction in sync_static_service.
+- Separate update_or_create to update and bulk_create in sync_static_service.
+- No coercion in setting the lock class.
+
+
 0.0.9 (May 15th 2018)
 -------------------
 - Fix bug for sync logic

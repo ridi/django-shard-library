@@ -14,7 +14,10 @@ def get_first_day() -> datetime:
 # StaticSyncStatus is isolation each shards.
 class StaticSyncStatus(models.Model):
     static_model_key = models.CharField(max_length=64, unique=True, verbose_name='Static Model Key')
-    last_modified = models.DateTimeField(null=False, default=get_first_day, verbose_name='Last Modified', )
+    criterion_datetime = models.DateTimeField(null=False, default=get_first_day, verbose_name='Criterion Datetime', )
+
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Created Datetime', )
+    last_modified = models.DateTimeField(auto_now=True, verbose_name='Last Modified', )
 
     objects = ShardStaticStatusManager()
 

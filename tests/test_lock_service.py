@@ -1,6 +1,7 @@
 # flake8: noqa: W0212  # pylint: disable=protected-access
 from unittest.mock import patch
 
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
 from shard_static import config
@@ -40,3 +41,8 @@ class LockServiceTestCase(TestCase):
     def test_raise_attribute_error_in_import_lock_manager_class(self):
         with self.assertRaises(AttributeError):
             lock_service._import_lock_manager_class()
+
+    @patch('shard_static.config.SHARD_SYNC_LOCK_MANAGER_CLASS', None)
+    def test_raise_improperly_configured_when_not_configured_lock_class(self):
+        with self.assertRaises(ImproperlyConfigured):
+            lock_service.get_lock_manager('model', 'alias')

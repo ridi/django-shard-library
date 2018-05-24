@@ -18,7 +18,12 @@
 ``` python
 # in settings.py
 
-DATABASES = ConfigHelper.database_configs(
+INSTALLED_APPS = [
+    # ...
+    'shard',
+]
+
+DATABASES = ConfigHelper.generate_database_configs(
     unshard = {
         'default': {
             'master': 'mysql://user:pwd@host/metadata',
@@ -66,10 +71,11 @@ class ShardModel(ShardMixin, models.Model):
 
 INSTALLED_APPS = [
     # ...
+    'shard',
     'shard_static',
 ]
 
-DATABASES = ConfigHelper.database_configs(
+DATABASES = ConfigHelper.generate_database_configs(
     # ...
 )
 
@@ -84,7 +90,7 @@ class ExampleStaticModel(BaseShardStaticModel):
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
-- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS`
+- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS` if you use `run_sync_with_lock`.
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 

@@ -7,7 +7,7 @@ __all__ = ('ConfigHelper', )
 
 class ConfigHelper:
     @staticmethod
-    def database_configs(unshard: Dict=None, shard: Dict=None) -> Dict:
+    def generate_database_configs(unshard: Dict=None, shard: Dict=None) -> Dict:
         configuration = {}
 
         # Make Unshard Configuration

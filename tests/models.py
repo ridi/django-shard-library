@@ -9,6 +9,8 @@ from shard_static.models import BaseShardStaticModel
 
 
 class ShardStaticA(BaseShardStaticModel, models.Model):
+    text = models.CharField(null=True, max_length=32)
+
     shard_group = 'shard_a'
 
 

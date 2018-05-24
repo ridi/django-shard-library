@@ -6,7 +6,7 @@ from django.test import TestCase
 from shard.config.helper import ConfigHelper
 from shard.utils import database
 
-mock = MagicMock(return_value=ConfigHelper.database_configs(
+mock = MagicMock(return_value=ConfigHelper.generate_database_configs(
     unshard={
         'default': {
             'master': 'mysql://user:pwd@host/metadata',

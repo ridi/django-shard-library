@@ -10,18 +10,34 @@ from tests.models import ShardStaticA, ShardStaticB
 
 
 class SyncStaticServiceTestCase(TestCase):
-    def test_sync_success_with_shard_a_only(self):
+    def test_sync_success(self):
         _objs = [G(ShardStaticA) for _ in range(10)]
         databases = get_master_databases_by_shard_group(shard_group=ShardStaticA.shard_group, clear=True)
 
-        try:
-            for db in databases:
-                sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
-        except:  # flake8: noqa: E722  # pylint:disable=bare-except
-            self.fail('sync_static is fail')
+        for db in databases:
+            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+            self.assertEqual(len(_objs), ShardStaticA.objects.shard(shard=db).count())
+
+        # Clear Database For isolating testcase
+        for db in databases:
+            ShardStaticA.objects.shard(shard=db).delete()
+
+    def test_sync_success_when_update(self):
+        _objs = [G(ShardStaticA) for _ in range(10)]
+        databases = get_master_databases_by_shard_group(shard_group=ShardStaticA.shard_group, clear=True)
 
         for db in databases:
+            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
             self.assertEqual(len(_objs), ShardStaticA.objects.shard(shard=db).count())
+
+        obj = _objs[0]
+        obj.text = 'for test'
+        obj.save()
+
+        for db in databases:
+            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+            updated = ShardStaticA.objects.shard(shard=db).get(id=obj.id).text
+            self.assertEqual(updated, 'for test')
 
         # Clear Database For isolating testcase
         for db in databases:
