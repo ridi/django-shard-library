@@ -12,11 +12,11 @@ class ConHashPool:
         self._nodes = nodes
         self._replica = replica
         self._ring_length = len(nodes) * replica
-        self._ring: List[ConHashNode] = []
+        self._ring = []
 
         self.make_ring()
 
-    def get_node(self, value: Any):
+    def get_node(self, value: Any) -> 'ConHashNode':
         hash_value = con_hash(value=value)
         node_pos = self.get_node_pos(hash_value=hash_value)
 
@@ -62,7 +62,7 @@ class ConHashPool:
         _dummy = hash_index * _MAX_32BIT_INTEGER
         return f"{node}:{node_index}:{hash_index}:{_dummy}"
 
-    def _has_hash(self, hash_value: int):
+    def _has_hash(self, hash_value: int) -> bool:
         for item in self._ring:
             if item.hash_value == hash_value:
                 return True
