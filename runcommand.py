@@ -62,7 +62,7 @@ SETTINGS_DICT = {
         'shard_static',
     ],
     'DATABASE_ROUTERS': ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter'],
-    'SHARD_SYNC_LOCK_MANAGER_CLASS': 'tests.lock.FakeLockManager',
+    'SHARD_TRANSMIT_LOCK_MANAGER_CLASS': 'tests.lock.FakeLockManager',
 }
 
 

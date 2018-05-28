@@ -10,7 +10,7 @@ from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group, get_shard_by_instance
 from shard_static.exceptions import DontLinkException
 from shard_static.mixins import ShardStaticMixin
-from shard_static.models import StaticSyncStatus
+from shard_static.models import StaticTransmitStatus
 
 
 class ShardStaticRouter(BaseReplicationRouter):
@@ -19,9 +19,9 @@ class ShardStaticRouter(BaseReplicationRouter):
         if super_allow_relation is not None:
             return super_allow_relation
 
-        # Don't link StaticSyncStatus and other model.
-        # StaticSyncStatus is isolation each shards.
-        if isinstance(obj1, StaticSyncStatus) or isinstance(obj2, StaticSyncStatus):
+        # Don't link StaticTransmitStatus and other model.
+        # StaticTransmitStatus is isolation each shards.
+        if isinstance(obj1, StaticTransmitStatus) or isinstance(obj2, StaticTransmitStatus):
             return False
 
         if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
@@ -56,18 +56,18 @@ class ShardStaticRouter(BaseReplicationRouter):
             model = app.get_model(model_name)
 
         shard_group_for_db = settings.DATABASES[db].get(DATABASE_CONFIG_SHARD_GROUP, None)
-        if not issubclass(model, (ShardMixin, ShardStaticMixin, StaticSyncStatus)):
+        if not issubclass(model, (ShardMixin, ShardStaticMixin, StaticTransmitStatus)):
             if shard_group_for_db:
                 return False
             return None
 
-        if issubclass(model, StaticSyncStatus):
+        if issubclass(model, StaticTransmitStatus):
             if db == DEFAULT_DATABASE or shard_group_for_db is None:
                 return False
             return True
 
         if issubclass(model, ShardStaticMixin):
-            if model.diffusible and db == DEFAULT_DATABASE:
+            if model.transmit and db == DEFAULT_DATABASE:
                 return True
 
         return shard_group_for_db == model.shard_group

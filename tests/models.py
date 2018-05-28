@@ -16,7 +16,7 @@ class ShardStaticA(BaseShardStaticModel, models.Model):
 
 class ShardStaticB(BaseShardStaticModel, models.Model):
     shard_group = 'shard_b'
-    diffusible = False
+    transmit = False
 
 
 class ShardModelA(ShardMixin, models.Model):

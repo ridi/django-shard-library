@@ -5,29 +5,29 @@ from django_dynamic_fixture import G
 
 from shard.utils.database import get_master_databases_by_shard_group
 from shard_static.exceptions import InvalidDatabaseAliasException, NotShardStaticException
-from shard_static.services import sync_static_service
+from shard_static.services import static_transmit_service
 from tests.models import ShardStaticA, ShardStaticB
 
 
-class SyncStaticServiceTestCase(TestCase):
-    def test_sync_success(self):
+class TransmitStaticServiceTestCase(TestCase):
+    def test_transmit_success(self):
         _objs = [G(ShardStaticA) for _ in range(10)]
         databases = get_master_databases_by_shard_group(shard_group=ShardStaticA.shard_group, clear=True)
 
         for db in databases:
-            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+            static_transmit_service.run_transmit_with_lock('tests.ShardStaticA', db)
             self.assertEqual(len(_objs), ShardStaticA.objects.shard(shard=db).count())
 
         # Clear Database For isolating testcase
         for db in databases:
             ShardStaticA.objects.shard(shard=db).delete()
 
-    def test_sync_success_when_update(self):
+    def test_transmit_success_when_update(self):
         _objs = [G(ShardStaticA) for _ in range(10)]
         databases = get_master_databases_by_shard_group(shard_group=ShardStaticA.shard_group, clear=True)
 
         for db in databases:
-            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+            static_transmit_service.run_transmit_with_lock('tests.ShardStaticA', db)
             self.assertEqual(len(_objs), ShardStaticA.objects.shard(shard=db).count())
 
         obj = _objs[0]
@@ -35,7 +35,7 @@ class SyncStaticServiceTestCase(TestCase):
         obj.save()
 
         for db in databases:
-            sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+            static_transmit_service.run_transmit_with_lock('tests.ShardStaticA', db)
             updated = ShardStaticA.objects.shard(shard=db).get(id=obj.id).text
             self.assertEqual(updated, 'for test')
 
@@ -43,15 +43,15 @@ class SyncStaticServiceTestCase(TestCase):
         for db in databases:
             ShardStaticA.objects.shard(shard=db).delete()
 
-    def test_sync_failure_with_different_between_object_and_shard_group(self):
+    def test_transmit_failure_with_different_between_object_and_shard_group(self):
         databases = get_master_databases_by_shard_group(shard_group=ShardStaticB.shard_group, clear=True)
 
         with self.assertRaises(InvalidDatabaseAliasException):
             for db in databases:
-                sync_static_service.run_sync_with_lock('tests.ShardStaticA', db)
+                static_transmit_service.run_transmit_with_lock('tests.ShardStaticA', db)
 
-    def test_sync_failure_with_normal_model(self):
+    def test_transmit_failure_with_normal_model(self):
         database = get_master_databases_by_shard_group(shard_group=ShardStaticB.shard_group, clear=True)[0]
 
         with self.assertRaises(NotShardStaticException):
-            sync_static_service.run_sync_with_lock('tests.NormalModel', database)
+            static_transmit_service.run_transmit_with_lock('tests.NormalModel', database)

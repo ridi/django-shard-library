@@ -90,7 +90,7 @@ class ExampleStaticModel(BaseShardStaticModel):
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
-- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS` if you use `run_sync_with_lock`.
+- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS` if you use `run_transmit_with_lock`.
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
@@ -102,7 +102,7 @@ If you want to using `shard_static`, you refer to this.
 ``` python
 @task  # celery
 def wrap_sync_static(model_name, database_alias):
-    sync_static_service.run_sync_with_lock(model_name, database_alias)
+    sync_static_service.run_transmit_with_lock(model_name, database_alias)
 
 def run_sync_supervisor():
     static_models = [
