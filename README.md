@@ -94,6 +94,18 @@ class ExampleStaticModel(BaseShardStaticModel):
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
+#### If you want to change replica count
+```python
+# in settings.py
+
+SHARD_REPLICA_COUNT_SETTING = {
+    'SHARD_GROUP_A': 1024,
+    'SHARD_GROUP_B': 128,
+}
+```
+
+- Default is 512.
+
 ## Snippets
 We don't want to have dependency of celery and redis.  
 If you want to using `shard_static`, you refer to this.
