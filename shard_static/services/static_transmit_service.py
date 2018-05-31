@@ -9,43 +9,44 @@ from django.forms import model_to_dict
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
 from shard.utils.database import get_master_databases_by_shard_group
 from shard_static import config
-from shard_static.exceptions import InvalidDatabaseAliasException, NotDiffusibleException, NotShardStaticException
-from shard_static.models import BaseShardStaticModel, StaticSyncStatus
+from shard_static.exceptions import InvalidDatabaseAliasException, NotTransmitException, NotShardStaticException
+from shard_static.models import BaseShardStaticModel, StaticTransmitStatus
 from shard_static.services import lock_service
 
-logger = logging.getLogger('shard_static.services.sync_static_service')
+logger = logging.getLogger('shard_static.services.static_transmit_service')
 
 
 _BATCH_SIZE = 1000
 
 
-def run_sync_with_lock(model_name: str, database_alias: str):
+def run_transmit_with_lock(model_name: str, database_alias: str):
     lock_manager = lock_service.get_lock_manager(model_name, database_alias)
     if not lock_manager.lock():
         logger.info(f'Already exists processing - {model_name}, {database_alias}')
         return
 
     try:
-        run_sync(model_name=model_name, database_alias=database_alias)
+        run_transmit(model_name=model_name, database_alias=database_alias)
     finally:
         lock_manager.release()
 
 
-def run_sync(model_name: str, database_alias: str):
+def run_transmit(model_name: str, database_alias: str):
     model = _get_model(model_name=model_name)
 
     _validate_model(model)
     _validate_database(model, database_alias)
 
-    sync_status, _ = StaticSyncStatus.objects.shard(shard=database_alias).get_or_create(static_model_key=_make_sync_key(model=model))
+    transmit_status, _ = StaticTransmitStatus.objects.shard(shard=database_alias)\
+        .get_or_create(static_model_key=_make_transmit_key(model=model))
 
     offset = 0
-    limit = config.SHARD_SYNC_MAX_ITEMS
+    limit = config.SHARD_TRANSMIT_MAX_ITEMS
     while True:
-        source_items = model.objects.find_by_last_modified(last_modified=sync_status.criterion_datetime, offset=offset, limit=limit)
+        source_items = model.objects.find_by_last_modified(last_modified=transmit_status.criterion_datetime, offset=offset, limit=limit)
         logger.debug(
-            f'[Load source items] - criterion_datetime: {sync_status.criterion_datetime}, offset: {offset}, limit: {limit}',
-            extra={'offset': offset, 'limit': limit, 'criterion_datetime': sync_status.criterion_datetime}
+            f'[Load source items] - criterion_datetime: {transmit_status.criterion_datetime}, offset: {offset}, limit: {limit}',
+            extra={'offset': offset, 'limit': limit, 'criterion_datetime': transmit_status.criterion_datetime}
         )
 
         if source_items.count() == 0:
@@ -54,9 +55,9 @@ def run_sync(model_name: str, database_alias: str):
 
         last_modified = _insert_items(items=source_items, model=model, database_alias=database_alias)
 
-        if sync_status.criterion_datetime != last_modified:
-            sync_status.criterion_datetime = last_modified
-            sync_status.save(using=database_alias)
+        if transmit_status.criterion_datetime != last_modified:
+            transmit_status.criterion_datetime = last_modified
+            transmit_status.save(using=database_alias)
             return
 
         offset += limit
@@ -101,8 +102,8 @@ def _validate_model(model: Type[BaseShardStaticModel]):
     if not issubclass(model, BaseShardStaticModel):
         raise NotShardStaticException()
 
-    if not model.diffusible:
-        raise NotDiffusibleException()
+    if not model.transmit:
+        raise NotTransmitException()
 
 
 def _validate_database(model: Type[BaseShardStaticModel], database_alias: str):
@@ -125,5 +126,5 @@ def _get_shard_group_from_database(database_alias: str) -> Optional[str]:
     return None
 
 
-def _make_sync_key(model: Type[BaseShardStaticModel]):
+def _make_transmit_key(model: Type[BaseShardStaticModel]):
     return model._meta.db_table  # flake8: noqa: W0212 pylint: disable=protected-access

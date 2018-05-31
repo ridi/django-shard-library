@@ -10,9 +10,9 @@ def get_first_day() -> datetime:
     return datetime(1970, 1, 1)
 
 
-# Don't link StaticSyncStatus and other model.
-# StaticSyncStatus is isolation each shards.
-class StaticSyncStatus(models.Model):
+# Don't link StaticTransmitStatus and other model.
+# StaticTransmitStatus is isolation each shards.
+class StaticTransmitStatus(models.Model):
     static_model_key = models.CharField(max_length=64, unique=True, verbose_name='Static Model Key')
     criterion_datetime = models.DateTimeField(null=False, default=get_first_day, verbose_name='Criterion Datetime', )
 
@@ -22,7 +22,7 @@ class StaticSyncStatus(models.Model):
     objects = ShardStaticStatusManager()
 
     class Meta:
-        db_table = 'static_sync_status'
+        db_table = 'static_transmit_status'
 
 
 class BaseShardStaticModel(ShardStaticMixin, models.Model):

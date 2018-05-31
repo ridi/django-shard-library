@@ -7,7 +7,7 @@ from shard_static.exceptions import NotExistsOriginalDataException, DontExecuteE
 
 def _wrap_for_static(func_name):
     def wrapped(self, *args, **kwargs):
-        if not self.model.diffusible:
+        if not self.model.transmit:
             raise NotExistsOriginalDataException()
 
         return getattr(self.get_queryset(), func_name)(*args, **kwargs)

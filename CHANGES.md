@@ -1,5 +1,11 @@
 Changelog
 =========
+0.0.11 (May 31st 2018)
+-------------------
+- Change definition for shard_static from sync to transmit
+- Change con_hash algorithm from sha256 to md5
+- Increase DEFAULT_REPLICA_COUNT to 512
+
 0.0.10 (May 24th 2018)
 -------------------
 - The shard logic is made to use of consistent hash.

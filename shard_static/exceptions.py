@@ -4,7 +4,7 @@ class NotShardStaticException(Exception):
     pass
 
 
-class NotDiffusibleException(Exception):
+class NotTransmitException(Exception):
     pass
 
 

@@ -80,7 +80,7 @@ DATABASES = ConfigHelper.generate_database_configs(
 )
 
 DATABASE_ROUTERS = ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter']
-SHARD_SYNC_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
+SHARD_TRANSMIT_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
 ```
 ``` python
 # in models.py
@@ -90,21 +90,33 @@ class ExampleStaticModel(BaseShardStaticModel):
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
-- Must set `SHARD_SYNC_LOCK_MANAGER_CLASS` if you use `run_sync_with_lock`.
+- Must set `SHARD_TRANSMIT_LOCK_MANAGER_CLASS` if you use `run_transmit_with_lock`.
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
+
+#### If you want to change replica count
+```python
+# in settings.py
+
+SHARD_REPLICA_COUNT_SETTING = {
+    'SHARD_GROUP_A': 1024,
+    'SHARD_GROUP_B': 128,
+}
+```
+
+- Default is 512.
 
 ## Snippets
 We don't want to have dependency of celery and redis.  
 If you want to using `shard_static`, you refer to this.
 
-#### Supervisor for running syncer
+#### Supervisor for running transmiter
 ``` python
 @task  # celery
-def wrap_sync_static(model_name, database_alias):
-    sync_static_service.run_sync_with_lock(model_name, database_alias)
+def wrap_transmit_static(model_name, database_alias):
+    transmit_static_service.run_transmit_with_lock(model_name, database_alias)
 
-def run_sync_supervisor():
+def run_transmit_supervisor():
     static_models = [
         ShardStaticA,
         # ...
@@ -114,7 +126,7 @@ def run_sync_supervisor():
         databases = get_master_databases_by_shard_group(static_model.shard_group)
 
         for database in databases:
-            wrap_sync_static.delay(static_model._meta.label, database)
+            wrap_transmit_static.delay(static_model._meta.label, database)
 ```
 
 #### RedisLockManager

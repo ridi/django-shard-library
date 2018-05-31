@@ -3,7 +3,7 @@ from django.conf import settings
 __all__ = ('get_replica_count', )
 
 SHARD_REPLICA_COUNT_SETTING = 'SHARD_REPLICA_COUNT_SETTING'
-DEFAULT_REPLICA_COUNT = 128
+DEFAULT_REPLICA_COUNT = 512
 
 
 def get_replica_count(shard_group: str) -> int:

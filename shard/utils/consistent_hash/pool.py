@@ -1,8 +1,7 @@
-from typing import List, Any
+from typing import Any, List
 
-from shard.utils.consistent_hash.con_hash import con_hash
+from shard.utils.consistent_hash.con_hash import md5_hash
 from shard.utils.consistent_hash.node import ConHashNode
-
 
 _MAX_32BIT_INTEGER = 2147483647
 
@@ -12,12 +11,12 @@ class ConHashPool:
         self._nodes = nodes
         self._replica = replica
         self._ring_length = len(nodes) * replica
-        self._ring: List[ConHashNode] = []
+        self._ring = []
 
         self.make_ring()
 
-    def get_node(self, value: Any):
-        hash_value = con_hash(value=value)
+    def get_node(self, value: Any) -> 'ConHashNode':
+        hash_value = self._hash(value=value)
         node_pos = self.get_node_pos(hash_value=hash_value)
 
         return self._ring[node_pos]
@@ -49,7 +48,7 @@ class ConHashPool:
 
         while _start_index < replica:
             pseudo_name = self._make_pseudo_name(node=node, node_index=node_index, hash_index=_hash_index)
-            hash_value = con_hash(pseudo_name)
+            hash_value = self._hash(pseudo_name)
             _hash_index += 1
 
             if self._has_hash(hash_value=hash_value):
@@ -62,9 +61,12 @@ class ConHashPool:
         _dummy = hash_index * _MAX_32BIT_INTEGER
         return f"{node}:{node_index}:{hash_index}:{_dummy}"
 
-    def _has_hash(self, hash_value: int):
+    def _has_hash(self, hash_value: int) -> bool:
         for item in self._ring:
             if item.hash_value == hash_value:
                 return True
 
         return False
+
+    def _hash(self, value: Any) -> int:
+        return md5_hash(value)
