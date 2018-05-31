@@ -18,8 +18,8 @@ class ShardRouterTestCase(TestCase):
         write_db2 = self.router.db_for_write(model=obj2.__class__, instance=obj2)
         write_db3 = self.router.db_for_write(model=obj3.__class__, instance=obj3)
 
-        self.assertEqual(write_db1, write_db2)
-        self.assertNotEqual(write_db1, write_db3)
+        self.assertEqual(write_db1, write_db3)
+        self.assertNotEqual(write_db2, write_db3)
 
     def test_db_for_write_with_normal_object(self):
         obj1 = G(NormalModel, normal_parent=None, shard_parent=None, static_all=None)
@@ -36,8 +36,8 @@ class ShardRouterTestCase(TestCase):
 
         self.assertNotEqual(shard_a_obj1.shard_group, shard_b_obj1.shard_group)
 
-        self.assertTrue(self.router.allow_relation(shard_a_obj1, shard_a_obj2))
-        self.assertFalse(self.router.allow_relation(shard_a_obj1, shard_a_obj3))
+        self.assertTrue(self.router.allow_relation(shard_a_obj1, shard_a_obj3))
+        self.assertFalse(self.router.allow_relation(shard_a_obj2, shard_a_obj3))
 
         self.assertFalse(self.router.allow_relation(shard_a_obj1, shard_b_obj1))
         self.assertFalse(self.router.allow_relation(shard_a_obj2, shard_b_obj1))
