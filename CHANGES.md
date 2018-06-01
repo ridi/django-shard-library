@@ -1,5 +1,11 @@
 Changelog
 =========
+0.0.12 (Jun 1st 2018)
+-------------------
+- Change con_hash algorithm to blake2b
+- Change to transmit datetime field from the source.
+    - for example last_modified, created
+
 0.0.11 (May 31st 2018)
 -------------------
 - Change definition for shard_static from sync to transmit
