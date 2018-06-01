@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.13 (Jun 1st 2018)
+-------------------
+- Fix bug that loop is run more than expectation.
+
 0.0.12 (Jun 1st 2018)
 -------------------
 - Change con_hash algorithm to blake2b
