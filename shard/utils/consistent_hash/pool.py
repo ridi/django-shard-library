@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from shard.utils.consistent_hash.con_hash import md5_hash
+from shard.utils.consistent_hash import con_hash
 from shard.utils.consistent_hash.node import ConHashNode
 
 _MAX_32BIT_INTEGER = 2147483647
@@ -69,4 +69,4 @@ class ConHashPool:
         return False
 
     def _hash(self, value: Any) -> int:
-        return md5_hash(value)
+        return con_hash.blake2b_hash(value)

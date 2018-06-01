@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional, Type, List
+from typing import Optional, Type, List, Dict
 
 from django.apps import apps
 from django.conf import settings
@@ -12,6 +12,8 @@ from shard_static import config
 from shard_static.exceptions import InvalidDatabaseAliasException, NotTransmitException, NotShardStaticException
 from shard_static.models import BaseShardStaticModel, StaticTransmitStatus
 from shard_static.services import lock_service
+
+__all__ = ('run_transmit_with_lock', 'run_transmit', )
 
 logger = logging.getLogger('shard_static.services.static_transmit_service')
 
@@ -73,9 +75,7 @@ def _insert_items(items: List, model: Type[BaseShardStaticModel], database_alias
             last_modified = item.last_modified
 
         if item.id in exist_item_ids:
-            data = model_to_dict(
-                item, fields=[field.name for field in item._meta.fields]  # flake8: noqa: W0212 pylint: disable=protected-access
-            )
+            data = _get_data(item)
 
             logger.debug(f'[Insert items] Update {item.id}')
             model.objects.shard(shard=database_alias).filter(id=item.id).update(**data)
@@ -87,6 +87,15 @@ def _insert_items(items: List, model: Type[BaseShardStaticModel], database_alias
         model.objects.shard(shard=database_alias).bulk_create(entities, _BATCH_SIZE)
 
     return last_modified
+
+
+def _get_data(instance: BaseShardStaticModel) -> Dict:
+    data = {}
+
+    for field in instance._meta.fields:  # flake8: noqa: W0212 pylint: disable=protected-access
+        data[field.name] = field.value_from_object(instance)
+
+    return data
 
 
 def _get_model(model_name: str) -> Type[BaseShardStaticModel]:
