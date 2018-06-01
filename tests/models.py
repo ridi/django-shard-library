@@ -1,9 +1,8 @@
 from django.db import models
 
-from shard.constants import DEFAULT_DATABASE
 from shard.fields import TableStrategyPkField
 from shard.managers import ShardManager
-from shard.mixins import ShardMixin, SpecificDatabaseMixin
+from shard.mixins import ShardMixin
 from shard.models import TableStrategyModel
 from shard_static.models import BaseShardStaticModel
 
