@@ -7,7 +7,7 @@ from shard.utils.memorize import memorize
 
 __all__ = (
     'get_shard_groups', 'get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group',
-    'get_slave_databases_by_master',
+    'get_slave_databases_by_master', 'get_tables',
 )
 
 
@@ -23,10 +23,12 @@ def get_shard_groups() -> List[str]:
         if config.get(DATABASE_CONFIG_SHARD_GROUP) is None or config.get(DATABASE_CONFIG_SHARD_NUMBER) is None:
             continue
 
-        if key in groups:
+        database = config.get(DATABASE_CONFIG_SHARD_GROUP)
+        if database in groups:
             continue
 
-        groups.append(config.get(DATABASE_CONFIG_SHARD_GROUP))
+        groups.append(database)
+
     return groups
 
 
@@ -96,6 +98,17 @@ def get_slave_databases_by_master(master: str) -> List[str]:
             continue
 
         result.append(key)
+
+    return result
+
+
+@memorize
+def get_tables(databases: List) -> List[str]:
+    result = []
+
+    _databases = _get_databases()
+    for database in databases:
+        result.append(_databases[database]['NAME'])
 
     return result
 
