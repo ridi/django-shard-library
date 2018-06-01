@@ -16,7 +16,7 @@ def get_shard_groups() -> List[str]:
     databases = _get_databases()
     groups = []
 
-    for key, config in databases.items():
+    for config in databases.values():
         if config.get(DATABASE_CONFIG_MASTER):
             continue
 
