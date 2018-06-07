@@ -10,6 +10,8 @@ from shard_static.models import BaseShardStaticModel, BaseStaticTransmitStatus
 class StaticTransmitStatus(BaseStaticTransmitStatus):
     criterion_id = models.IntegerField(null=False, default=1, verbose_name='Criterion ID')
 
+    shard_group = 'shard_a'
+
     @property
     def criterion(self) -> int:
         return self.criterion_id
@@ -19,13 +21,17 @@ class StaticTransmitStatus(BaseStaticTransmitStatus):
         self.criterion_id = next_criterion
 
 
-class ShardStaticA(BaseShardStaticModel, models.Model):
+class ShardStaticA(BaseShardStaticModel):
     text = models.CharField(null=True, max_length=32)
 
     shard_group = 'shard_a'
 
 
-class ShardStaticB(BaseShardStaticModel, models.Model):
+class ShardStaticTransmittableB(BaseShardStaticModel):
+    shard_group = 'shard_b'
+
+
+class ShardStaticB(BaseShardStaticModel):
     shard_group = 'shard_b'
     transmit = False
 

@@ -15,10 +15,11 @@ class Transmitter:
     def __init__(self, shard: str, model_class: Type[BaseShardStaticModel]):
         self.shard = shard
         self.model_class = model_class
-        self.status = self._get_status()
 
         self._validate_model()
         self._validate_database()
+
+        self.status = self._get_status()
 
     def run(self) -> List[BaseShardStaticModel]:
         next_criterion, items = self.collect()

@@ -15,7 +15,7 @@ def _wrap_for_static(func_name):
 
 def _wrap_for_status(func_name):
     def wrapped(self, shard: str, *args, **kwargs):
-        return self.shard(shard=shard)
+        return getattr(self.shard(shard=shard), func_name)(*args, **kwargs)
 
     wrapped.__name__ = func_name
     return wrapped
