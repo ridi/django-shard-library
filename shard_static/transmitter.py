@@ -19,20 +19,17 @@ class Transmitter:
         self._validate_model()
         self._validate_database()
 
-        self.status = self._get_status()
-
-    def run(self) -> List[BaseShardStaticModel]:
-        next_criterion, items = self.collect()
+    def run(self):
+        status = self._get_status()
+        last_criterion, items = self.collect(status)
         items = self.pre_transmit(items)
 
         with transaction.atomic(using=self.shard):
             items = self.transmit(items)
-            items = self.post_transmit(items)
-            self._save_status(next_criterion)
+            self.post_transmit(items)
+            self._save_status(status, last_criterion)
 
-        return items
-
-    def collect(self) -> Tuple[Any, List[BaseShardStaticModel]]:
+    def collect(self, status: BaseStaticTransmitStatus) -> Tuple[Any, List[BaseShardStaticModel]]:
         raise NotImplementedError
 
     def pre_transmit(self, source_items: List[BaseShardStaticModel]) -> List[BaseShardStaticModel]:
@@ -73,9 +70,11 @@ class Transmitter:
         status, _ = self.status_class.objects.get_or_create(shard=self.shard, key=self._make_transmit_key())
         return status
 
-    def _save_status(self, next_criterion):
-        self.status.criterion = next_criterion
-        self.status.save(using=self.shard)
+    def _save_status(self, status: BaseStaticTransmitStatus, last_criterion) -> BaseStaticTransmitStatus:
+        status.criterion = last_criterion
+        status.save(using=self.shard)
+
+        return status
 
     def _make_transmit_key(self) -> str:
         return self.model_class._meta.db_table  # flake8: noqa: W0212 pylint: disable=protected-access
