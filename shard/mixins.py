@@ -42,9 +42,16 @@ class SpecificDatabaseMixin:
         return cls._specific_database
 
 
-class ShardMixin:
+class BaseShardMixin:
     shard_group = None
+
+
+class ShardMixin(BaseShardMixin):
     shard_key_name = None
 
     def get_shard_key(self):
         return getattr(self, self.shard_key_name)
+
+
+class IsolatedShardMixin(BaseShardMixin):
+    pass
