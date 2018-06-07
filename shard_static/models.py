@@ -6,7 +6,7 @@ from shard_static.mixins import ShardStaticMixin
 
 
 class BaseStaticTransmitStatus(IsolatedShardMixin, models.Model):
-    key = models.CharField(max_length=64, unique=True, verbose_name='Key')
+    key = models.CharField(max_length=64, unique=True, verbose_name='Transmit Status Key')
 
     created = models.DateTimeField(auto_now_add=True, verbose_name='Created Datetime', )
     last_modified = models.DateTimeField(auto_now=True, verbose_name='Last Modified', )
