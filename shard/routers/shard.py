@@ -4,7 +4,7 @@ from django.apps import apps
 from django.conf import settings
 
 from shard.constants import DATABASE_CONFIG_SHARD_GROUP
-from shard.mixins import ShardMixin
+from shard.mixins import ShardMixin, IsolatedShardMixin
 from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_instance, get_shard_by_shard_key_and_shard_group
 
@@ -14,6 +14,11 @@ class ShardRouter(BaseReplicationRouter):
         super_allow_relation = super().allow_relation(obj1, obj2, **hints)
         if super_allow_relation is not None:
             return super_allow_relation
+
+        # Don't link IsolatedShardMixin and other model.
+        # IsolatedShardMixin is isolation each shards.
+        if isinstance(obj1, IsolatedShardMixin) or isinstance(obj2, IsolatedShardMixin):
+            return False
 
         if isinstance(obj1, ShardMixin) and isinstance(obj2, ShardMixin):
             return obj1.shard_group == obj2.shard_group
@@ -39,7 +44,7 @@ class ShardRouter(BaseReplicationRouter):
             model = app.get_model(model_name)
 
         shard_group_for_db = settings.DATABASES[db].get(DATABASE_CONFIG_SHARD_GROUP, None)
-        if not issubclass(model, ShardMixin):
+        if not issubclass(model, (ShardMixin, IsolatedShardMixin)):
             if shard_group_for_db:
                 return False
             return None
@@ -47,7 +52,7 @@ class ShardRouter(BaseReplicationRouter):
         return shard_group_for_db == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
-        if not issubclass(model, ShardMixin):
+        if not issubclass(model, (ShardMixin, IsolatedShardMixin)):
             return None
 
         shard = None

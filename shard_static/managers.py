@@ -1,8 +1,5 @@
-from datetime import datetime
-from typing import Optional
-
 from shard.managers import BaseShardManager
-from shard_static.exceptions import NotExistsOriginalDataException, DontExecuteException
+from shard_static.exceptions import NotExistsOriginalDataException
 
 
 def _wrap_for_static(func_name):
@@ -17,8 +14,8 @@ def _wrap_for_static(func_name):
 
 
 def _wrap_for_status(func_name):
-    def wrapped(self, *args, **kwargs):
-        raise DontExecuteException()
+    def wrapped(self, shard: str, *args, **kwargs):
+        return getattr(self.shard(shard=shard), func_name)(*args, **kwargs)
 
     wrapped.__name__ = func_name
     return wrapped
@@ -38,7 +35,3 @@ class ShardStaticManager(BaseShardManager):
     create = _wrap_for_static('create')
     get_or_create = _wrap_for_static('get_or_create')
     update_or_create = _wrap_for_static('update_or_create')
-
-    def find_by_last_modified(self, last_modified: Optional[datetime], offset: int, limit: int):
-        qs = self.filter(last_modified__gte=last_modified).order_by('last_modified')
-        return qs[offset:offset + limit]
