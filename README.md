@@ -80,7 +80,6 @@ DATABASES = ConfigHelper.generate_database_configs(
 )
 
 DATABASE_ROUTERS = ['shard.routers.specific.SpecificRouter', 'shard_static.routers.ShardStaticRouter']
-SHARD_TRANSMIT_LOCK_MANAGER_CLASS = 'common.lock.RedisLockManager'
 ```
 ``` python
 # in models.py
@@ -90,7 +89,7 @@ class ExampleStaticModel(BaseShardStaticModel):
 ```
 
 - Must includes `shard_static` to `INSTALLED_APPS`
-- Must set `SHARD_TRANSMIT_LOCK_MANAGER_CLASS` if you use `run_transmit_with_lock`.
+- Must implement `transmitter` and `BaseStaticTransmitStatus`.
 - Must use `shard_static.routers.ShardStaticRouter`
     - `ShardStaticRouter` is extended feature that all of the `ShardRouter`.
 
@@ -105,53 +104,6 @@ SHARD_REPLICA_COUNT_SETTING = {
 ```
 
 - Default is 512.
-
-## Snippets
-We don't want to have dependency of celery and redis.  
-If you want to using `shard_static`, you refer to this.
-
-#### Supervisor for running transmiter
-``` python
-@task  # celery
-def wrap_transmit_static(model_name, database_alias):
-    transmit_static_service.run_transmit_with_lock(model_name, database_alias)
-
-def run_transmit_supervisor():
-    static_models = [
-        ShardStaticA,
-        # ...
-    ]
-
-    for static_model in static_models:
-        databases = get_master_databases_by_shard_group(static_model.shard_group)
-
-        for database in databases:
-            wrap_transmit_static.delay(static_model._meta.label, database)
-```
-
-#### RedisLockManager
-``` python
-class RedisLockManager(BaseLockManager):
-    def get_connection():
-        return Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DATABASE)
-
-    def is_locked(self) -> bool:
-        conn = self.get_connection()
-        value = conn.get(self.key)
-        return value is not None
-
-    def lock(self) -> bool:
-        conn = self.get_connection()
-        return conn.set(self.key, self.uuid, ex=self.ttl, nx=True)
-
-    def ping(self) -> bool:
-        conn = self.get_connection()
-        return conn.expire(self.key, self.ttl)
-
-    def release(self) -> bool:
-        conn = self.get_connection()
-        return conn.delete(self.key)
-```
 
 ## How to run test
 - Step 1: Run database for testing.  

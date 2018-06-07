@@ -27,7 +27,7 @@ class Transmitter:
         with transaction.atomic(using=self.shard):
             items = self.transmit(items)
             items = self.post_transmit(items)
-            self.save_status(next_criterion)
+            self._save_status(next_criterion)
 
         return items
 
@@ -35,21 +35,13 @@ class Transmitter:
         raise NotImplementedError
 
     def pre_transmit(self, source_items: List[BaseShardStaticModel]) -> List[BaseShardStaticModel]:
-        raise NotImplementedError
+        return source_items
 
     def transmit(self, items: List[BaseShardStaticModel]) -> List[BaseShardStaticModel]:
         raise NotImplementedError
 
     def post_transmit(self, items: List[BaseShardStaticModel]):
-        raise NotImplementedError
-
-    def save_status(self, next_criterion):
-        self.status.criterion = next_criterion
-        self.status.save(using=self.shard)
-
-    def _get_status(self) -> BaseStaticTransmitStatus:
-        status, _ = self.status_class.objects.get_or_create(shard=self.shard, key=self._make_transmit_key())
-        return status
+        return items
 
     def _validate_model(self):
         if not issubclass(self.model_class, BaseShardStaticModel):
@@ -75,6 +67,14 @@ class Transmitter:
             return db_setting.get(DATABASE_CONFIG_SHARD_GROUP, None)
 
         return None
+
+    def _get_status(self) -> BaseStaticTransmitStatus:
+        status, _ = self.status_class.objects.get_or_create(shard=self.shard, key=self._make_transmit_key())
+        return status
+
+    def _save_status(self, next_criterion):
+        self.status.criterion = next_criterion
+        self.status.save(using=self.shard)
 
     def _make_transmit_key(self) -> str:
         return self.model_class._meta.db_table  # flake8: noqa: W0212 pylint: disable=protected-access
