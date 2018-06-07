@@ -1,9 +1,0 @@
-from django.conf import settings
-
-from shard_static.constants import DEFAULT_MAX_ITEMS, DEFAULT_LOCK_TTL
-
-SHARD_TRANSMIT_MAX_ITEMS = getattr(settings, 'SHARD_TRANSMIT_MAX_ITEMS', DEFAULT_MAX_ITEMS)
-
-SHARD_TRANSMIT_LOCK_KEY_PREFIX = getattr(settings, 'SHARD_TRANSMIT_LOCK_KEY_PREFIX', 'shard_transmit_lock')
-SHARD_TRANSMIT_LOCK_TTL = getattr(settings, 'SHARD_TRANSMIT_LOCK_TTL', DEFAULT_LOCK_TTL)
-SHARD_TRANSMIT_LOCK_MANAGER_CLASS = getattr(settings, 'SHARD_TRANSMIT_LOCK_MANAGER_CLASS', None)
