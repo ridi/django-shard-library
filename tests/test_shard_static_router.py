@@ -62,7 +62,7 @@ class ShardStaticRouterTestCase(TestCase):
         shard_a_static = G(ShardStaticA)
         shard_b_static = ShardStaticB.objects.shard(
             get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
-        ).create(last_modified=datetime.now())
+        ).create()
 
         normal_object = G(NormalModel)
 
@@ -79,7 +79,7 @@ class ShardStaticRouterTestCase(TestCase):
         shard_a_static = G(ShardStaticA)
         shard_b_static = ShardStaticB.objects.shard(
             get_shard_by_shard_key_and_shard_group(shard_key=1, shard_group=ShardStaticB.shard_group)
-        ).create(last_modified=datetime.now())
+        ).create()
 
         self.assertFalse(self.router.allow_relation(shard_a_static, shard_b_static))
 
