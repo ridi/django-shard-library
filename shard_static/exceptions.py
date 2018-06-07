@@ -16,9 +16,5 @@ class NotExistsOriginalDataException(Exception):
     pass
 
 
-class DontExecuteException(Exception):
-    pass
-
-
 class DontLinkException(Exception):
     pass

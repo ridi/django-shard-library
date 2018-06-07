@@ -1,8 +1,5 @@
-from datetime import datetime
-from typing import Optional
-
 from shard.managers import BaseShardManager
-from shard_static.exceptions import NotExistsOriginalDataException, DontExecuteException
+from shard_static.exceptions import NotExistsOriginalDataException
 
 
 def _wrap_for_static(func_name):
@@ -17,8 +14,8 @@ def _wrap_for_static(func_name):
 
 
 def _wrap_for_status(func_name):
-    def wrapped(self, *args, **kwargs):
-        raise DontExecuteException()
+    def wrapped(self, shard: str, *args, **kwargs):
+        return self.shard(shard=shard)
 
     wrapped.__name__ = func_name
     return wrapped
