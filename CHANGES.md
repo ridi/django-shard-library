@@ -1,5 +1,13 @@
 Changelog
 =========
+0.0.14 (Jun 4st 2018)
+-------------------
+- Refac logic for transmitting
+    - Remove static_transmit_service.
+    - Initialize transmitter interface
+- Remove config about lock
+
+
 0.0.13 (Jun 1st 2018)
 -------------------
 - Fix bug that loop is run more than expectation.
