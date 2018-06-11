@@ -35,6 +35,7 @@ DATABASES = ConfigHelper.generate_database_configs(
             'shard_options': {
                 'database_name': 'product',
                 'logical_count': 4,
+                'conn_max_age': 0,
             },
             'db_options': {  # Optional
                 'sql_mode': 'STRICT_TRANS_TABLE',

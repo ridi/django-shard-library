@@ -29,7 +29,7 @@ def make_shard_configuration(shard_group: str, shard_options: Dict, shards: List
                     )
                     for slave_database_url in shard_config.get('slaves', [])
                 ],
-                'conn_max_age': shard_config.get('conn_max_age', 0)
+                'conn_max_age': shard_options.get('conn_max_age', 0)
             }
 
             configuration.update(make_replication_configuration(key=shard_name, replication_config=replication_config, options={
@@ -58,7 +58,7 @@ def make_replication_configuration(key: str, replication_config: Dict, options: 
 
 
 def _generate_database_config(
-        database_url: str, conn_max_age: int = 0, is_replica_of: Optional[str]=None, shard_group: Optional[str]=None,
+        database_url: str, conn_max_age: int, is_replica_of: Optional[str]=None, shard_group: Optional[str]=None,
         shard_number: Optional[int]=None
 ) -> Dict:
     db_config = config(default=database_url, conn_max_age=conn_max_age)
