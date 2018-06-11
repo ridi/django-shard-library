@@ -1,12 +1,15 @@
 Changelog
 =========
-0.0.14 (Jun 4st 2018)
+0.0.15 (Jun 11st 2018)
+-------------------
+- Add conn_max_age parameter.
+
+0.0.14 (Jun 4th 2018)
 -------------------
 - Refac logic for transmitting
     - Remove static_transmit_service.
     - Initialize transmitter interface
 - Remove config about lock
-
 
 0.0.13 (Jun 1st 2018)
 -------------------
@@ -30,7 +33,6 @@ Changelog
 - Remove transaction in sync_static_service.
 - Separate update_or_create to update and bulk_create in sync_static_service.
 - No coercion in setting the lock class.
-
 
 0.0.9 (May 15th 2018)
 -------------------
