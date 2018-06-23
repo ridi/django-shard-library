@@ -1,23 +1,30 @@
-import os
-import sys
 from multiprocessing.pool import Pool
+from typing import Dict, List
 
 from django.core.management.base import BaseCommand
 
+from shard.services.execute_query_service import ExecuteQueryService
 from shard.utils.database import get_master_databases_by_shard_group
 
 
-class ExecuteQueryOnAllShardCommand(BaseCommand):
+class ProcessParams:
+    def __init__(self, shard: str, queries: List[str]):
+        self._shard = shard
+        self._queries = queries
+
+    @property
+    def queries(self) -> List[str]:
+        return self.queries
+
+    @property
+    def shard(self) -> str:
+        return self.shard
+
+
+class Command(BaseCommand):
     title = 'Execute the query on all shard.'
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--sql_file', '-f',
-            type=str,
-            dest='sql_file',
-            help='Path of file containing the query',
-        )
-
         parser.add_argument(
             '--shard_group', '-s',
             type=str,
@@ -26,27 +33,19 @@ class ExecuteQueryOnAllShardCommand(BaseCommand):
         )
 
         parser.add_argument(
-            '--manage_file',
+            '--sql_file', '-f',
             type=str,
-            default='manage.py',
-            dest='manage_file',
-            help='Path of django manage file',
-        )
-
-        parser.add_argument(
-            '--print_sql',
-            action='store_true',
-            dest='print_sql',
-            help='Print sql before execution',
+            dest='sql_file',
+            help='Path of file containing the query',
         )
 
     @staticmethod
     def assert_if_params_are_not_valid(**options):
-        if not options['sql_file']:
-            raise Exception('Parameter sql_file is required')
-
         if not options['shard_group']:
             raise Exception('Parameter shard_group is required')
+
+        if not options['sql_file']:
+            raise Exception('Parameter sql_file is required')
 
     def handle(self, *args, **options):
         self.assert_if_params_are_not_valid(**options)
@@ -54,8 +53,22 @@ class ExecuteQueryOnAllShardCommand(BaseCommand):
         shard_group = options['shard_group']
         databases = get_master_databases_by_shard_group(shard_group)
 
-        def run_process(shard: str):
-            os.system(f'{sys.executable} {options["manage_file"]} execute_query_command -s {shard} -f {options["sql_file"]} --print_sql')
+        def run_process(params: ProcessParams) -> Dict:
+            return {
+                'shard': params.shard,
+                'result': ExecuteQueryService.execute_queries(params.shard, params.queries)
+            }
 
+        queries = self._load_queries(options['sql_file'])
         pool = Pool(processes=len(databases))
-        pool.map(run_process, databases)
+        result = pool.map(run_process, [ProcessParams(database, queries) for database in databases])
+        print(result)
+
+    @staticmethod
+    def _load_queries(file_name: str):
+        file = open(file_name, 'r')
+        query = file.read()
+        file.close()
+
+        query_list = [s and s.strip() for s in query.split(';')]
+        return list(filter(None, query_list))
