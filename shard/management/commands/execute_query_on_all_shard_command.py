@@ -1,4 +1,5 @@
 from multiprocessing.pool import Pool
+from pprint import pprint
 from typing import Dict
 
 from django.core.management.base import BaseCommand
@@ -54,4 +55,4 @@ class Command(BaseCommand):
             'result': pool.map(run_process, [{'shard': database, 'queries': queries} for database in databases]),
         }
 
-        print(result)
+        pprint(result)

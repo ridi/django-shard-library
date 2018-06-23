@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from django.core.management.base import BaseCommand
 
 from shard.services.execute_query_service import ExecuteQueryService
@@ -41,4 +43,4 @@ class Command(BaseCommand):
             'result': ExecuteQueryService.execute_queries(shard, queries)
         }
 
-        print(result)
+        pprint(result)
