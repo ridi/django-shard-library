@@ -1,5 +1,5 @@
 from multiprocessing.pool import Pool
-from typing import Dict, List
+from typing import Dict
 
 from django.core.management.base import BaseCommand
 
@@ -8,18 +8,11 @@ from shard.services.query_file_handler import QueryFileHandler
 from shard.utils.database import get_master_databases_by_shard_group
 
 
-class ProcessParams:
-    def __init__(self, shard: str, queries: List[str]):
-        self._shard = shard
-        self._queries = queries
-
-    @property
-    def queries(self) -> List[str]:
-        return self.queries
-
-    @property
-    def shard(self) -> str:
-        return self.shard
+def run_process(params) -> Dict:
+    return {
+        'shard': params['shard'],
+        'result': ExecuteQueryService.execute_queries(params['shard'], params['queries']),
+    }
 
 
 class Command(BaseCommand):
@@ -49,12 +42,6 @@ class Command(BaseCommand):
             raise Exception('Parameter sql_file is required')
 
     def handle(self, *args, **options):
-        def run_process(params: ProcessParams) -> Dict:
-            return {
-                'shard': params.shard,
-                'result': ExecuteQueryService.execute_queries(params.shard, params.queries)
-            }
-
         self.assert_if_params_are_not_valid(**options)
 
         shard_group = options['shard_group']
@@ -64,7 +51,7 @@ class Command(BaseCommand):
         pool = Pool(processes=len(databases))
         result = {
             'shard_group': shard_group,
-            'result': pool.map(run_process, [ProcessParams(database, queries) for database in databases])
+            'result': pool.map(run_process, [{'shard': database, 'queries': queries} for database in databases]),
         }
 
         print(result)
