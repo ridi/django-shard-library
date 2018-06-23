@@ -9,7 +9,7 @@ class ExecuteQueryService:
         result = []
         with connections[shard].cursor() as cursor:
             for query in queries:
-                cls.execute_query(cursor, query)
+                result.append(cls.execute_query(cursor, query))
 
         return result
 
