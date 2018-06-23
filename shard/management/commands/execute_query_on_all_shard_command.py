@@ -4,6 +4,7 @@ from typing import Dict, List
 from django.core.management.base import BaseCommand
 
 from shard.services.execute_query_service import ExecuteQueryService
+from shard.services.query_file_handler import QueryFileHandler
 from shard.utils.database import get_master_databases_by_shard_group
 
 
@@ -48,27 +49,22 @@ class Command(BaseCommand):
             raise Exception('Parameter sql_file is required')
 
     def handle(self, *args, **options):
-        self.assert_if_params_are_not_valid(**options)
-
-        shard_group = options['shard_group']
-        databases = get_master_databases_by_shard_group(shard_group)
-
         def run_process(params: ProcessParams) -> Dict:
             return {
                 'shard': params.shard,
                 'result': ExecuteQueryService.execute_queries(params.shard, params.queries)
             }
 
-        queries = self._load_queries(options['sql_file'])
+        self.assert_if_params_are_not_valid(**options)
+
+        shard_group = options['shard_group']
+        databases = get_master_databases_by_shard_group(shard_group)
+        queries = QueryFileHandler.load_queries(options['sql_file'])
+
         pool = Pool(processes=len(databases))
-        result = pool.map(run_process, [ProcessParams(database, queries) for database in databases])
+        result = {
+            'shard_group': shard_group,
+            'result': pool.map(run_process, [ProcessParams(database, queries) for database in databases])
+        }
+
         print(result)
-
-    @staticmethod
-    def _load_queries(file_name: str):
-        file = open(file_name, 'r')
-        query = file.read()
-        file.close()
-
-        query_list = [s and s.strip() for s in query.split(';')]
-        return list(filter(None, query_list))

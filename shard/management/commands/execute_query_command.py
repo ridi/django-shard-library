@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from shard.services.execute_query_service import ExecuteQueryService
+from shard.services.query_file_handler import QueryFileHandler
 
 
 class Command(BaseCommand):
@@ -33,7 +34,7 @@ class Command(BaseCommand):
         self.assert_if_params_are_not_valid(**options)
 
         shard = options['shard']
-        queries = self._load_queries(options['sql_file'])
+        queries = QueryFileHandler.load_queries(options['sql_file'])
 
         result = {
             'shard': shard,
@@ -41,12 +42,3 @@ class Command(BaseCommand):
         }
 
         print(result)
-
-    @staticmethod
-    def _load_queries(file_name: str):
-        file = open(file_name, 'r')
-        query = file.read()
-        file.close()
-
-        query_list = [s and s.strip() for s in query.split(';')]
-        return list(filter(None, query_list))
