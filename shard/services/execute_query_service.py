@@ -1,20 +1,29 @@
+from django.db import DatabaseError, connections, transaction
 from typing import Dict, List
-
-from django.db import DatabaseError, connections
 
 
 class ExecuteQueryService:
     @classmethod
-    def execute_queries(cls, shard: str, queries: List[str]) -> List:
-        result = []
+    def execute_queries_by_shard(cls, shard: str, queries: List[str]) -> List:
         with connections[shard].cursor() as cursor:
-            for query in queries:
-                result.append(cls.execute_query(cursor, query))
+            return cls.execute_queries(cursor, queries)
+
+    @classmethod
+    def execute_queries_by_shard_with_transaction(cls, shard: str, queries: List[str]) -> List:
+        with transaction.atomic(shard):
+            with connections[shard].cursor() as cursor:
+                return cls.execute_queries(cursor, queries)
+
+    @classmethod
+    def execute_queries(cls, cursor, queries: List[str]) -> List:
+        result = []
+        for query in queries:
+            result.append(cls.execute_query(cursor, query))
 
         return result
 
     @classmethod
-    def execute_query(cls, cursor, query) -> Dict:
+    def execute_query(cls, cursor, query: str) -> Dict:
         result = {
             'query': query
         }
