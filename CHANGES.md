@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.16 (Jun 27st 2018)
+-------------------
+- Add query executor django command.
+
 0.0.15 (Jun 11st 2018)
 -------------------
 - Add conn_max_age parameter.
