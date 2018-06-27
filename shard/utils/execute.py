@@ -1,6 +1,7 @@
 from django.db import connections, transaction
 
 from shard.exceptions import QueryExecuteFailureException
+from shard.services.execute_query_service import ExecuteQueryService
 from shard.utils.database import get_master_databases_by_shard_group
 
 
@@ -18,8 +19,9 @@ class QueryExecutor:
             for shard in self._shards:
                 with transaction.atomic(shard):
                     cursor = connections[shard].cursor()
-                    cursor.execute(query)
+                    ExecuteQueryService.execute_query(cursor, query)
                 executed.append(shard)
+
         except Exception as e:
             raise QueryExecuteFailureException(shard_group=self._shard_group, executed=executed, exception=e)
 
