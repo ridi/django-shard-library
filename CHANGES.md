@@ -1,5 +1,9 @@
 Changelog
 =========
+0.0.17 (Jun 28st 2018)
+-------------------
+- Fix bug for execute_query_command and service.
+
 0.0.16 (Jun 27st 2018)
 -------------------
 - Add query executor django command.
