@@ -12,8 +12,7 @@ __all__ = ('ShardManager',)
 def _wrap(func_name):
     def wrapped(self, *args, **kwargs):
         shard_key = get_shard_key_from_kwargs(model=self.model, **kwargs)
-        is_fresh = kwargs.get('is_fresh', False)
-        return getattr(self.get_queryset(shard_key=shard_key, is_fresh=is_fresh), func_name)(*args, **kwargs)
+        return getattr(self.get_queryset(shard_key=shard_key), func_name)(*args, **kwargs)
 
     wrapped.__name__ = func_name
     return wrapped
@@ -22,14 +21,18 @@ def _wrap(func_name):
 class BaseShardManager(Manager):
     _strategy = RandomReadStrategy
 
-    def shard(self, shard: str, is_fresh: bool = False):
-        if not is_fresh:
+    def __init__(self, is_fresh: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self._is_fresh = is_fresh
+
+    def shard(self, shard: str):
+        if not self._is_fresh:
             shard = self._strategy.pick_read_db(shard)
 
         return self.get_queryset().using(shard)
 
-    def get_queryset(self, shard_key=None, is_fresh: bool = False):
-        hints = {'shard_key': shard_key, 'is_fresh': is_fresh, }
+    def get_queryset(self, shard_key=None):
+        hints = {'shard_key': shard_key, 'is_fresh': self._is_fresh, }
         return ShardQuerySet(model=self.model, hints=hints)
 
 
