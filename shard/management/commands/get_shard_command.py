@@ -13,6 +13,7 @@ class Command(BaseCommand):
             type=str,
             dest='shard_group',
             help='Shard group',
+            required=True,
         )
 
         parser.add_argument(
@@ -20,20 +21,8 @@ class Command(BaseCommand):
             type=str,
             dest='shard key',
             help='Shard Key',
+            required=True,
         )
 
-    @staticmethod
-    def assert_if_params_are_not_valid(**options):
-        if not options['shard_group']:
-            raise Exception('Parameter shard_group is required')
-
-        if not options['shard_key']:
-            raise Exception('Parameter shard_key is required')
-
     def handle(self, *args, **options):
-        self.assert_if_params_are_not_valid(**options)
-
-        shard = options['shard_group']
-        key = options['shard_key']
-
-        pprint(get_shard_by_shard_key_and_shard_group(key, shard))
+        pprint(get_shard_by_shard_key_and_shard_group(options['shard_key'], options['shard_group']))
