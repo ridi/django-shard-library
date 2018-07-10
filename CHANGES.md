@@ -1,5 +1,9 @@
 Changelog
 =========
+0.1.0 (July 10st 2018)
+-------------------
+- Add fresh manger mode.
+
 0.0.17 (Jun 28st 2018)
 -------------------
 - Fix bug for execute_query_command and service.
