@@ -19,7 +19,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--shard_key', '-k',
             type=str,
-            dest='shard key',
+            dest='shard_key',
             help='Shard Key',
             required=True,
         )
