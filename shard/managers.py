@@ -1,12 +1,12 @@
 import typing
-
 from django.db.models.manager import Manager
 
 from shard.queryset import ShardQuerySet
+from shard.strategy.routing.random import RandomReadStrategy
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from shard.utils.shard_key import get_shard_key_from_kwargs
 
-__all__ = ('ShardManager', )
+__all__ = ('ShardManager',)
 
 
 def _wrap(func_name):
@@ -19,11 +19,20 @@ def _wrap(func_name):
 
 
 class BaseShardManager(Manager):
+    _strategy = RandomReadStrategy
+
+    def __init__(self, is_fresh: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self._is_fresh = is_fresh
+
     def shard(self, shard: str):
+        if not self._is_fresh:
+            shard = self._strategy.pick_read_db(shard)
+
         return self.get_queryset().using(shard)
 
     def get_queryset(self, shard_key=None):
-        hints = {'shard_key': shard_key}
+        hints = {'shard_key': shard_key, 'is_fresh': self._is_fresh, }
         return ShardQuerySet(model=self.model, hints=hints)
 
 
@@ -32,7 +41,7 @@ class ShardManager(BaseShardManager):
         return self.shard(shard=get_shard_by_shard_key_and_shard_group(shard_key=shard_key, shard_group=self.model.shard_group)).raw(query)
 
     def bulk_create(self, shard_key: int, objs: typing.List, batch_size: int):
-        return self.shard(shard=get_shard_by_shard_key_and_shard_group(shard_key=shard_key, shard_group=self.model.shard_group))\
+        return self.shard(shard=get_shard_by_shard_key_and_shard_group(shard_key=shard_key, shard_group=self.model.shard_group)) \
             .bulk_create(objs=objs, batch_size=batch_size)
 
     filter = _wrap('filter')

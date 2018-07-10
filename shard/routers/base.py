@@ -28,6 +28,9 @@ class BaseReplicationRouter(BaseRouter):
         if master is None:
             return None
 
+        if hints.get('is_fresh', False):
+            return master
+
         return self._get_slave_database(master=master)
 
     def db_for_write(self, model, **hints):

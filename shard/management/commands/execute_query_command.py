@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from pprint import pprint
+from typing import List
 
 from shard.services.execute_query_service import ExecuteQueryService
 from shard.services.query_file_handler import QueryFileHandler
@@ -14,6 +15,7 @@ class Command(BaseCommand):
             type=str,
             dest='shard',
             help='Shard to execute the query',
+            required=True,
         )
 
         parser.add_argument(
@@ -21,6 +23,7 @@ class Command(BaseCommand):
             type=str,
             dest='sql_file',
             help='Path of file containing the query',
+            required=True,
         )
 
         parser.add_argument(
@@ -31,18 +34,15 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def assert_if_params_are_not_valid(**options):
-        if not options['shard']:
-            raise Exception('Parameter shard is required')
-
-        if not options['sql_file']:
-            raise Exception('Parameter sql_file is required')
+    def print_queries(queries: List[str]):
+        for query in queries:
+            print(query)
 
     def handle(self, *args, **options):
-        self.assert_if_params_are_not_valid(**options)
-
         shard = options['shard']
         queries = QueryFileHandler.load_queries(options['sql_file'])
+
+        self.print_queries(queries)
 
         if options['with_transaction']:
             result = ExecuteQueryService.execute_queries_by_shard_with_transaction(shard, queries)

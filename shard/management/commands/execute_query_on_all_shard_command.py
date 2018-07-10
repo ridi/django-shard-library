@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from multiprocessing.pool import Pool
 from pprint import pprint
-from typing import Dict
+from typing import Dict, List
 
 from shard.services.execute_query_service import ExecuteQueryService
 from shard.services.query_file_handler import QueryFileHandler
@@ -29,6 +29,7 @@ class Command(BaseCommand):
             type=str,
             dest='shard_group',
             help='Shard group to execute',
+            required=True,
         )
 
         parser.add_argument(
@@ -36,6 +37,7 @@ class Command(BaseCommand):
             type=str,
             dest='sql_file',
             help='Path of file containing the query',
+            required=True,
         )
 
         parser.add_argument(
@@ -46,22 +48,19 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def assert_if_params_are_not_valid(**options):
-        if not options['shard_group']:
-            raise Exception('Parameter shard_group is required')
-
-        if not options['sql_file']:
-            raise Exception('Parameter sql_file is required')
+    def print_queries(queries: List[str]):
+        for query in queries:
+            print(query)
 
     def handle(self, *args, **options):
-        self.assert_if_params_are_not_valid(**options)
-
         shard_group = options['shard_group']
         databases = get_master_databases_by_shard_group(shard_group)
         queries = QueryFileHandler.load_queries(options['sql_file'])
         params = [
             {'shard': database, 'queries': queries, 'with_transaction': options['with_transaction']} for database in databases
         ]
+
+        self.print_queries(queries)
 
         pool = Pool(processes=len(databases))
         result = {
