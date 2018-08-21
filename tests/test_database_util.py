@@ -9,36 +9,32 @@ from shard.utils import database
 mock = MagicMock(return_value=ConfigHelper.generate_database_configs(
     unshard={
         'default': {
-            'master': 'mysql://user:pwd@host/metadata',
-            'slaves': ['mysql://user:pwd@host/metadata', ]
+            'master': {'url': 'mysql://user:pwd@host/metadata'},
+            'slaves': [{'url': 'mysql://user:pwd@host/metadata'}, ]
         },
     },
     shard={
         'PRODUCT_GROUP': {
-            'shard_options': {
-                'database_name': 'product',
-                'logical_count': 4,
-            },
+            'database_name': 'product',
+            'logical_count': 4,
             'shards': [
                 {
-                    'master': 'mysql://user:pwd@host/',
-                    'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/', ]
+                    'master': {'url': 'mysql://user:pwd@host/'},
+                    'slaves': [{'url': 'mysql://user:pwd@host/'}, {'url': 'mysql://user:pwd@host/'}, ]
                 },
                 {
-                    'master': 'mysql://user:pwd@host/',
-                    'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/', ]
+                    'master': {'url': 'mysql://user:pwd@host/'},
+                    'slaves': [{'url': 'mysql://user:pwd@host/'}, {'url': 'mysql://user:pwd@host/'}, ]
                 }
             ],
         },
         'PREPARE_PRODUCT_GROUP': {
-            'shard_options': {
-                'database_name': 'prepare_product',
-                'logical_count': 2,
-            },
+            'database_name': 'prepare_product',
+            'logical_count': 2,
             'shards': [
                 {
-                    'master': 'mysql://user:pwd@host/',
-                    'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/', ]
+                    'master': {'url': 'mysql://user:pwd@host/'},
+                    'slaves': [{'url': 'mysql://user:pwd@host/'}, {'url': 'mysql://user:pwd@host/'}, ]
                 },
             ],
         },

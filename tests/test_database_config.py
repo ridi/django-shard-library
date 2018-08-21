@@ -2,18 +2,17 @@ from django.test import TestCase
 
 from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
 from shard.config.database_config import make_replication_configuration, make_shard_configuration
-from shard.exceptions import RequireMasterConfigException
 
 
 class DatabaseConfigTestCase(TestCase):
     def test_replication_configuration(self):
-        defaults_config = make_replication_configuration(key='defaults', replication_config={
-            'master': 'mysql://user:pwd@host/metadata',
-            'slaves': ['mysql://user:pwd@host/metadata', ]
-        })
-        write_config = make_replication_configuration(key='write', replication_config={
-            'master': 'mysql://user:pwd@host/metadata',
-        })
+        defaults_config = make_replication_configuration(
+            key='defaults', master={'url': 'mysql://user:pwd@host/metadata'}, slaves=[{'url': 'mysql://user:pwd@host/metadata'}],
+            conn_max_age=0
+        )
+        write_config = make_replication_configuration(
+            key='write', master={'url': 'mysql://user:pwd@host/metadata'}, slaves=[], conn_max_age=0
+        )
 
         self.assertEqual(len(defaults_config), 2)
         self.assertEqual(len(write_config), 1)
@@ -22,17 +21,14 @@ class DatabaseConfigTestCase(TestCase):
         self.assertIsNone(defaults_config['defaults'].get(DATABASE_CONFIG_MASTER, None))
         self.assertEqual(defaults_config['defaults_slave_0'][DATABASE_CONFIG_MASTER], 'defaults')
 
-        with self.assertRaises(RequireMasterConfigException):
-            make_replication_configuration(key='dummy', replication_config={'slaves': ['mysql://user:pwd@host/meta', ]})
-
     def test_shard_configuration_only_master(self):
         configs = make_shard_configuration(
             shard_group='GROUP',
-            shard_options={
-                'database_name': 'prepare_product',
-                'logical_count': 4,
-            },
-            shards=[{'master': 'mysql://user:pwd@host/'}]
+            database_name='prepare_product',
+            logical_count=4,
+            conn_max_age=0,
+            options={},
+            shards=[{'master': {'url': 'mysql://user:pwd@host/'}}]
         )
 
         self.assertEqual(len(configs), 4)
@@ -45,13 +41,18 @@ class DatabaseConfigTestCase(TestCase):
     def test_shard_configuration_with_slave(self):
         configs = make_shard_configuration(
             shard_group='GROUP',
-            shard_options={
-                'database_name': 'prepare_product',
-                'logical_count': 4,
-            },
+            database_name='prepare_product',
+            logical_count=4,
+            conn_max_age=0,
+            options={},
             shards=[
-                {'master': 'mysql://user:pwd@host/', 'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/', ]},
-                {'master': 'mysql://user:pwd@host/', 'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/', ]}
+                {
+                    'master': {'url': 'mysql://user:pwd@host/'},
+                    'slaves': [{'url': 'mysql://user:pwd@host/'}, {'url': 'mysql://user:pwd@host/'}, ]
+                }, {
+                    'master': {'url': 'mysql://user:pwd@host/'},
+                    'slaves': [{'url': 'mysql://user:pwd@host/'}, {'url': 'mysql://user:pwd@host/'}, ]
+                }
             ]
         )
 

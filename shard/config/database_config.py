@@ -27,8 +27,7 @@ def make_shard_configuration(
             _master_shard, _slave_shards = _make_shard_config(master_shard, slave_shards, database_name, logical_index, options)
             configuration.update(make_replication_configuration(
                 key=shard_name, master=_master_shard, slaves=_slave_shards, conn_max_age=conn_max_age, shard_info={
-                    'shard_group': shard_group, 'shard_number': logical_index
-                }
+                    'shard_group': shard_group, 'shard_number': logical_index}
             ))
 
     return configuration
@@ -43,6 +42,7 @@ def make_replication_configuration(key: str, master: Dict, slaves: List[Dict], c
     configuration[key] = _generate_database_config(
         database_url=master['url'], conn_max_age=master.get('conn_max_age', conn_max_age), **shard_info
     )
+
     for index, slave in enumerate(slaves):
         slave_key = '%s_slave_%d' % (key, index)
         configuration[slave_key] = _generate_database_config(
