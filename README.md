@@ -26,30 +26,49 @@ INSTALLED_APPS = [
 DATABASES = ConfigHelper.generate_database_configs(
     unshard = {
         'default': {
-            'master': 'mysql://user:pwd@host/metadata',
-            'slaves': ['mysql://user:pwd@host/metadata?sql_mode=STRICT_TRANS_TABLE&charset=utf8', ]
+            'conn_max_age': 0,
+            'master': {
+                'url': 'mysql://user:pwd@host/metadata',
+                'conn_max_age': 1000,  # Optional
+            },
+            'slaves': [{
+                'url': 'mysql://user:pwd@host/metadata?sql_mode=STRICT_TRANS_TABLE&charset=utf8',
+                'conn_max_age': 500,  # Optional
+            }]
         },
     },
     shard = {
         'SHARD_GROUP_A': {
-            'shard_options': {
-                'database_name': 'product',
-                'logical_count': 4,
-                'conn_max_age': 0,
-            },
-            'db_options': {  # Optional
+            'database_name': 'product',
+            'logical_count': 4,
+            'conn_max_age': 0,  # Optional
+            'options': {  # Optional
                 'sql_mode': 'STRICT_TRANS_TABLE',
                 'charset': 'utf8',
             },
             'shards': [
                 {
-                    'master': 'mysql://user:pwd@host/',
-                    'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/',]
+                    'master': {
+                        'url': 'mysql://user:pwd@host/',
+                        'conn_max_age: 400,  # Optional
+                        'options': {  # Optional
+                            'charset': 'latin',
+                        },
+                    },
+                    'slaves': [{
+                        'url': 'mysql://user:pwd@host/',
+                        'conn_max_age: 600,  # Optional
+                    }, {
+                        'url': 'mysql://user:pwd@host/',
+                        'options': {  # Optional
+                            'charset': 'latin',
+                        },
+                    },]
                 },
                 {
-                    'master': 'mysql://user:pwd@host/',
-                    'slaves': ['mysql://user:pwd@host/', 'mysql://user:pwd@host/',]
-                }
+                    'master': { 'url': 'mysql://user:pwd@host/', },
+                    'slaves': [{ 'url': 'mysql://user:pwd@host/' }, { 'url': 'mysql://user:pwd@host/' },]
+                },
             ],
         },
     },
@@ -115,6 +134,9 @@ SHARD_REPLICA_COUNT_SETTING = {
 
 - Step 3: When end of test, you stop to database.  
 `make stop-test-db`
+
+## Warning
+- If you want to use this with django 2.1.0, Be careful missing shard key when getting queryset by raw query.
 
 ## Prior art
 - https://github.com/JBKahn/django-sharding

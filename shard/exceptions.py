@@ -1,7 +1,7 @@
 from typing import List
 
 __all__ = (
-    'StrategyNotImplementException', 'RequireSpecificDatabaseException', 'RequireMasterConfigException', 'NotShardingModelException',
+    'StrategyNotImplementException', 'RequireSpecificDatabaseException', 'NotShardingModelException',
     'RequireShardKeyException', 'QueryExecuteFailureException', 'NotFoundPoolException',
 )
 
@@ -11,10 +11,6 @@ class StrategyNotImplementException(Exception):
 
 
 class RequireSpecificDatabaseException(Exception):
-    pass
-
-
-class RequireMasterConfigException(Exception):
     pass
 
 

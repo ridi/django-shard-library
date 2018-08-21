@@ -1,14 +1,19 @@
 Changelog
 =========
-0.1.0 (July 10st 2018)
+0.1.1 (Aug 21st 2018)
+-------------------
+- Change the way which register database config.
+    - Add new feature which extend `options` and `conn_max_age` each shard.
+
+0.1.0 (July 10th 2018)
 -------------------
 - Add fresh manger mode.
 
-0.0.17 (Jun 28st 2018)
+0.0.17 (Jun 28th 2018)
 -------------------
 - Fix bug for execute_query_command and service.
 
-0.0.16 (Jun 27st 2018)
+0.0.16 (Jun 27th 2018)
 -------------------
 - Add query executor django command.
 
