@@ -5,6 +5,9 @@ from shard.config.database_config import make_shard_configuration, make_replicat
 __all__ = ('ConfigHelper', )
 
 
+DEFAULT_CONN_MAX_AGE = 0
+
+
 class ConfigHelper:
     @staticmethod
     def generate_database_configs(unshard: Optional[Dict]=None, shard: Optional[Dict]=None) -> Dict:
@@ -14,7 +17,8 @@ class ConfigHelper:
         if unshard:
             for key, config in unshard.items():
                 configuration.update(make_replication_configuration(
-                    key=key, master=config['master'], slaves=config.get('slaves', []), conn_max_age=config.get('conn_max_age', 0)
+                    key=key, master=config['master'], slaves=config.get('slaves', []),
+                    conn_max_age=config.get('conn_max_age', DEFAULT_CONN_MAX_AGE)
                 ))
 
         # Make Shard Configuration
