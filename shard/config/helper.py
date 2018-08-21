@@ -1,16 +1,15 @@
 from typing import Dict, Optional
 
-from shard.config.database_config import make_shard_configuration, make_replication_configuration
+from shard.config.database_config import make_replication_configuration, make_shard_configuration
 
-__all__ = ('ConfigHelper', )
-
+__all__ = ('ConfigHelper',)
 
 DEFAULT_CONN_MAX_AGE = 0
 
 
 class ConfigHelper:
     @staticmethod
-    def generate_database_configs(unshard: Optional[Dict]=None, shard: Optional[Dict]=None) -> Dict:
+    def generate_database_configs(unshard: Optional[Dict] = None, shard: Optional[Dict] = None) -> Dict:
         configuration = {}
 
         # Make Unshard Configuration
@@ -26,7 +25,8 @@ class ConfigHelper:
             for shard_group, config in shard.items():
                 configuration.update(make_shard_configuration(
                     shard_group=shard_group, database_name=config['database_name'], logical_count=config['logical_count'],
-                    conn_max_age=config.get('conn_max_age', 0), shards=config['shards'], options=config.get('options', {})
+                    conn_max_age=config.get('conn_max_age', DEFAULT_CONN_MAX_AGE), shards=config['shards'],
+                    options=config.get('options', {})
                 ))
 
         return configuration
