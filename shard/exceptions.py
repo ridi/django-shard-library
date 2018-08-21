@@ -14,10 +14,6 @@ class RequireSpecificDatabaseException(Exception):
     pass
 
 
-class RequireMasterConfigException(Exception):
-    pass
-
-
 class NotShardingModelException(Exception):
     pass
 
