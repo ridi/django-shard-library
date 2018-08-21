@@ -136,7 +136,7 @@ SHARD_REPLICA_COUNT_SETTING = {
 `make stop-test-db`
 
 ## Warning
-- If you want to use this with django 2.1.0, Be careful missing shard key in raw queryset.
+- If you want to use this with django 2.1.0, Be careful missing shard key when getting queryset by raw query.
 
 ## Prior art
 - https://github.com/JBKahn/django-sharding
