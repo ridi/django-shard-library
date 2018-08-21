@@ -11,7 +11,7 @@ SETTINGS_DICT = {
     'DATABASES': ConfigHelper.generate_database_configs(
         unshard={
             'default': {
-                'master': 'mysql://root:root@127.0.0.1/default?sql_mode=STRICT_TRANS_TABLES&charset=utf8',
+                'master': {'url': 'mysql://root:root@127.0.0.1/default?sql_mode=STRICT_TRANS_TABLES&charset=utf8'},
             },
         },
         shard={
