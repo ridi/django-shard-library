@@ -135,5 +135,8 @@ SHARD_REPLICA_COUNT_SETTING = {
 - Step 3: When end of test, you stop to database.  
 `make stop-test-db`
 
+## Warning
+- If you want to use this with django 2.1.0, Be careful missing shard key in raw queryset.
+
 ## Prior art
 - https://github.com/JBKahn/django-sharding
