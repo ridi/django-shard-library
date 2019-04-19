@@ -23,6 +23,10 @@ class SpecificRouter(BaseRouter):
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         model_name = model_name or hints.get('model_name')
         model = hints.get('model')
+
+        if model_name is None and model is None:
+            return None
+
         if model:
             model_name = model.__name__
 
