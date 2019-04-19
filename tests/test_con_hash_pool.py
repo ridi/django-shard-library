@@ -1,15 +1,14 @@
 # flake8: noqa: W0212  # pylint: disable=protected-access
 from typing import List, Dict, Tuple
 
-from django.test import TestCase
-
 from shard.utils.consistent_hash.node import ConHashNode
 from shard.utils.consistent_hash.pool import ConHashPool
+from tests.base import BaseTestCase
 
 _REPLICA_COUNT = 128
 
 
-class ConHashPoolTest(TestCase):
+class ConHashPoolTest(BaseTestCase):
     def test_make_ring(self):
         for pool_size in range(10, 16):
             pool = ConHashPool(list(range(pool_size)), _REPLICA_COUNT)

@@ -1,10 +1,9 @@
 # flake8: noqa: E1123  # pylint:disable=unexpected-keyword-arg
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
-
 from shard.config.helper import ConfigHelper
 from shard.utils import database
+from tests.base import BaseTestCase
 
 mock = MagicMock(return_value=ConfigHelper.generate_database_configs(
     unshard={
@@ -43,7 +42,7 @@ mock = MagicMock(return_value=ConfigHelper.generate_database_configs(
 
 
 @patch('shard.utils.database._get_databases', mock)
-class DatabaseUtilTestCase(TestCase):
+class DatabaseUtilTestCase(BaseTestCase):
     def test_get_master_databases(self):
         primary_configs_without_shard = database.get_master_databases(without_shard=True, clear=True)
         primary_configs_include_shard = database.get_master_databases(without_shard=False, clear=True)

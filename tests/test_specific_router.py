@@ -1,8 +1,7 @@
-from django.test import TestCase
-
 from shard.constants import DEFAULT_DATABASE
 from shard.mixins import SpecificDatabaseMixin
 from shard.routers.specific import SpecificRouter
+from tests.base import BaseTestCase
 
 
 class TestSpecificDefault(SpecificDatabaseMixin):
@@ -13,7 +12,8 @@ class TestSpecificDummy(SpecificDatabaseMixin):
     _specific_database = 'dummy'
 
 
-class SpecificRouterTestCase(TestCase):
+class SpecificRouterTestCase(BaseTestCase):
+
     def setUp(self):
 
         self.router = SpecificRouter()

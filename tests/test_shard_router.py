@@ -1,11 +1,11 @@
-from django.test import TestCase
 from django_dynamic_fixture import G
 
 from shard.routers.shard import ShardRouter
+from tests.base import BaseTestCase
 from tests.models import ShardModelA, NormalModel, ShardModelB
 
 
-class ShardRouterTestCase(TestCase):
+class ShardRouterTestCase(BaseTestCase):
     def setUp(self):
         self.router = ShardRouter()
 

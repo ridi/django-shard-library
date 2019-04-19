@@ -1,8 +1,7 @@
-
-from django.test import TestCase
 from unittest.mock import patch
 
 from shard.strategy.routing.random import RandomReadStrategy
+from tests.base import BaseTestCase
 
 
 def mock_get_slave_databases(master):
@@ -15,7 +14,7 @@ def mock_get_slave_databases(master):
 
 
 @patch('shard.strategy.routing.random.RandomReadStrategy.get_slave_databases', mock_get_slave_databases)
-class RandomRoutingTestCase(TestCase):
+class RandomRoutingTestCase(BaseTestCase):
     def setUp(self):
         self.strategy = RandomReadStrategy()
 

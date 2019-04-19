@@ -1,10 +1,9 @@
-from django.test import TestCase
-
-from shard.mixins import SpecificDatabaseMixin
 from shard.exceptions import RequireSpecificDatabaseException
+from shard.mixins import SpecificDatabaseMixin
+from tests.base import BaseTestCase
 
 
-class SpecificDatabaseMixinTestCase(TestCase):
+class SpecificDatabaseMixinTestCase(BaseTestCase):
     def setUp(self):
         class NotSelectSpecificDatabase(SpecificDatabaseMixin):
             pass
