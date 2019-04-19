@@ -1,15 +1,13 @@
-from datetime import datetime
-
-from django.test import TestCase
 from django_dynamic_fixture import G
 
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
 from shard_static.exceptions import DontLinkException
 from shard_static.routers import ShardStaticRouter
+from tests.base import BaseTestCase
 from tests.models import ShardModelA, NormalModel, ShardModelB, ShardStaticA, ShardStaticB
 
 
-class ShardStaticRouterTestCase(TestCase):
+class ShardStaticRouterTestCase(BaseTestCase):
     def setUp(self):
         self.router = ShardStaticRouter()
 

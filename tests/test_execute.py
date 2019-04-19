@@ -1,9 +1,8 @@
-from django.test import TestCase
-
 from shard.utils.execute import QueryExecutor
+from tests.base import BaseTestCase
 
 
-class ExecuteTestCase(TestCase):
+class ExecuteTestCase(BaseTestCase):
     def setUp(self):
         self.shard_group = 'shard_a'
 

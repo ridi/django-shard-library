@@ -1,12 +1,12 @@
 # flake8: noqa: W0212  # pylint: disable=protected-access
-from django.test import TestCase
 
 from shard.exceptions import RequireShardKeyException
 from shard.utils.shard import get_shard_by_shard_key_and_shard_group
+from tests.base import BaseTestCase
 from tests.models import ShardModelA
 
 
-class QuerysetTestCase(TestCase):
+class QuerysetTestCase(BaseTestCase):
     def setUp(self):
         self.shard_group = 'shard_a'
 

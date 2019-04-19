@@ -1,13 +1,13 @@
-from django.test import TestCase
 from django_dynamic_fixture import G
 
 from shard.utils.database import get_master_databases_by_shard_group
 from shard_static.exceptions import InvalidDatabaseAliasException, NotTransmitException
+from tests.base import BaseTestCase
 from tests.models import ShardStaticA, ShardStaticB, ShardStaticTransmittableB, StaticTransmitStatus
 from tests.transmitter import TestTransmitter
 
 
-class TransmitterTestCase(TestCase):
+class TransmitterTestCase(BaseTestCase):
     def setUp(self):
         self.items = [G(ShardStaticA), G(ShardStaticA), G(ShardStaticA), G(ShardStaticA)]
 

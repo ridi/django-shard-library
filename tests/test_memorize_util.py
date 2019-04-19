@@ -1,13 +1,12 @@
-from django.test import TestCase
-
 from shard.utils.memorize import memorize
+from tests.base import BaseTestCase
 
 
 def dummy_func(value):
     return object()
 
 
-class MemorizeUtilTestCase(TestCase):
+class MemorizeUtilTestCase(BaseTestCase):
     def setUp(self):
         self.func = memorize(dummy_func)
 

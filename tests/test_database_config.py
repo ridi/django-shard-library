@@ -1,10 +1,9 @@
-from django.test import TestCase
-
-from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
 from shard.config.database_config import make_replication_configuration, make_shard_configuration
+from shard.constants import DATABASE_CONFIG_MASTER, DATABASE_CONFIG_SHARD_GROUP, DATABASE_CONFIG_SHARD_NUMBER
+from tests.base import BaseTestCase
 
 
-class DatabaseConfigTestCase(TestCase):
+class DatabaseConfigTestCase(BaseTestCase):
     def test_replication_configuration(self):
         defaults_config = make_replication_configuration(
             key='defaults', master={'url': 'mysql://user:pwd@host/metadata'}, slaves=[{'url': 'mysql://user:pwd@host/metadata'}],

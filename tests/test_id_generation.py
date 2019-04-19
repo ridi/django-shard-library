@@ -1,10 +1,10 @@
-from django.test import TestCase
 from django_dynamic_fixture import G
 
+from tests.base import BaseTestCase
 from tests.models import IdGenerateTestModel, TestIds
 
 
-class TableStrategyTestCase(TestCase):
+class TableStrategyTestCase(BaseTestCase):
     def test_id_generation(self):
         dummy_one = G(IdGenerateTestModel)
         dummy_two = G(IdGenerateTestModel)
