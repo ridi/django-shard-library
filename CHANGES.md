@@ -1,5 +1,9 @@
 Changelog
 =========
+0.1.2 (Apr 19th 2019)
+-------------------
+- Support django 2.2
+
 0.1.1 (Aug 21st 2018)
 -------------------
 - Change the way which register database config.
