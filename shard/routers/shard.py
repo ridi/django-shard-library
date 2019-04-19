@@ -33,11 +33,11 @@ class ShardRouter(BaseReplicationRouter):
         model_name = model_name or hints.get('model_name')
         model = hints.get('model')
 
-        if model_name is None and model is None:
-            return None
-
         if model:
             model_name = model.__name__
+
+        if model_name is None:
+            return None
 
         if "." in model_name:
             _app_label = model_name.split('.')[0]
