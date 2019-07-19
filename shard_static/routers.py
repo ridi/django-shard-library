@@ -14,10 +14,6 @@ from shard_static.mixins import ShardStaticMixin
 
 class ShardStaticRouter(BaseReplicationRouter):
     def allow_relation(self, obj1, obj2, **hints):
-        super_allow_relation = super().allow_relation(obj1, obj2, **hints)
-        if super_allow_relation is not None:
-            return super_allow_relation
-
         # Don't link IsolatedShardMixin and other model.
         # IsolatedShardMixin is isolation each shards.
         if isinstance(obj1, IsolatedShardMixin) or isinstance(obj2, IsolatedShardMixin):
@@ -27,9 +23,11 @@ class ShardStaticRouter(BaseReplicationRouter):
             # if obj1 and obj2 are shard static model, all config of them have to be same.
             if isinstance(obj1, ShardStaticMixin) and isinstance(obj2, ShardStaticMixin):
                 return obj1.shard_group == obj2.shard_group and obj1.source_db == obj2.source_db and obj1.transmit == obj2.transmit
-
-            # obj1 and obj2 are for shard
-            return obj1.shard_group == obj2.shard_group
+            elif isinstance(obj1, ShardMixin) and isinstance(obj2, ShardMixin):
+                return super().allow_relation(obj1, obj2, **hints)
+            else:
+                # obj1 and obj2 are for shard
+                return obj1.shard_group == obj2.shard_group
 
         if (isinstance(obj1, (ShardMixin, ShardStaticMixin)) and not isinstance(obj2, (ShardMixin, ShardStaticMixin))) or \
                 (not isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin))):
@@ -81,13 +79,13 @@ class ShardStaticRouter(BaseReplicationRouter):
         if issubclass(model, ShardStaticMixin):
             if model.transmit:
                 return model.source_db
-        else:
-            shard = None
-            if hints.get('shard_key'):
-                shard = get_shard_by_shard_key_and_shard_group(shard_key=hints['shard_key'], shard_group=model.shard_group)
-            elif hints.get('instance'):
-                shard = get_shard_by_instance(instance=hints['instance'])
+            else:
+                return None
 
-            return shard
+        shard = None
+        if hints.get('shard_key'):
+            shard = get_shard_by_shard_key_and_shard_group(shard_key=hints['shard_key'], shard_group=model.shard_group)
+        elif hints.get('instance'):
+            shard = get_shard_by_instance(instance=hints['instance'])
 
-        return None
+        return shard
