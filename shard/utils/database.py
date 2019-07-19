@@ -7,7 +7,7 @@ from shard.utils.memorize import memorize
 
 __all__ = (
     'get_shard_groups', 'get_master_databases', 'get_master_databases_for_shard', 'get_master_databases_by_shard_group',
-    'get_slave_databases_by_master', 'get_tables',
+    'get_slave_databases_by_master', 'get_database_names',
 )
 
 
@@ -103,7 +103,7 @@ def get_slave_databases_by_master(master: str) -> List[str]:
 
 
 @memorize
-def get_tables(databases: List) -> List[str]:
+def get_database_names(databases: List) -> List[str]:
     result = []
 
     _databases = _get_databases()
