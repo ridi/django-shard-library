@@ -4,7 +4,7 @@ from typing import Optional
 from django.apps import apps
 from django.conf import settings
 
-from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
+from shard.constants import DATABASE_CONFIG_SHARD_GROUP
 from shard.mixins import IsolatedShardMixin, ShardMixin
 from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_instance, get_shard_by_shard_key_and_shard_group
@@ -24,6 +24,10 @@ class ShardStaticRouter(BaseReplicationRouter):
             return False
 
         if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
+            # if obj1 and obj2 are shard static model, all config of them have to be same.
+            if isinstance(obj1, ShardStaticMixin) and isinstance(obj2, ShardStaticMixin):
+                return obj1.shard_group == obj2.shard_group and obj1.source_db == obj2.source_db and obj1.transmit == obj2.transmit
+
             # obj1 and obj2 are for shard
             return obj1.shard_group == obj2.shard_group
 
@@ -65,19 +69,25 @@ class ShardStaticRouter(BaseReplicationRouter):
             return None
 
         if issubclass(model, ShardStaticMixin):
-            if model.transmit and db == DEFAULT_DATABASE:
+            if model.transmit and db == model.source_db:
                 return True
 
         return shard_group_for_db == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
-        if not issubclass(model, ShardMixin):
+        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
             return None
 
-        shard = None
-        if hints.get('shard_key'):
-            shard = get_shard_by_shard_key_and_shard_group(shard_key=hints['shard_key'], shard_group=model.shard_group)
-        elif hints.get('instance'):
-            shard = get_shard_by_instance(instance=hints['instance'])
+        if issubclass(model, ShardStaticMixin):
+            if model.transmit:
+                return model.source_db
+        else:
+            shard = None
+            if hints.get('shard_key'):
+                shard = get_shard_by_shard_key_and_shard_group(shard_key=hints['shard_key'], shard_group=model.shard_group)
+            elif hints.get('instance'):
+                shard = get_shard_by_instance(instance=hints['instance'])
 
-        return shard
+            return shard
+
+        return None
