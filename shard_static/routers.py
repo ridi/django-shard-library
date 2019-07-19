@@ -25,9 +25,8 @@ class ShardStaticRouter(BaseReplicationRouter):
                 return obj1.shard_group == obj2.shard_group and obj1.source_db == obj2.source_db and obj1.transmit == obj2.transmit
             elif isinstance(obj1, ShardMixin) and isinstance(obj2, ShardMixin):
                 return super().allow_relation(obj1, obj2, **hints)
-            else:
-                # obj1 and obj2 are for shard
-                return obj1.shard_group == obj2.shard_group
+
+            return obj1.shard_group == obj2.shard_group
 
         if (isinstance(obj1, (ShardMixin, ShardStaticMixin)) and not isinstance(obj2, (ShardMixin, ShardStaticMixin))) or \
                 (not isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin))):
@@ -79,8 +78,7 @@ class ShardStaticRouter(BaseReplicationRouter):
         if issubclass(model, ShardStaticMixin):
             if model.transmit:
                 return model.source_db
-            else:
-                return None
+            return None
 
         shard = None
         if hints.get('shard_key'):
