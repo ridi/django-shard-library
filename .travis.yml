@@ -15,7 +15,7 @@ jobs:
   - stage: test
     before_script:
       - make install-dev
-      - mysql -u root -e "use mysql; UPDATE user SET password=password('root') WHERE user='root'; flush privileges;"
+      - mysql -u root -e "use mysql; ALTER USER 'root'@'localhost' IDENTIFIED BY 'root'; flush privileges;"
     script:
       - make test
       - make lint
