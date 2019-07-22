@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = '0.1.2'
+version = '0.1.3'
 
 with open('requirements/base.txt') as f:
     install_requires = [line for line in f if line and not line.startswith('-')]
