@@ -2,7 +2,7 @@ from django.db import models
 
 from shard.exceptions import StrategyNotImplementException, RequireSpecificDatabaseException
 
-__all__ = ('StrategyPkMixin', 'SpecificDatabaseMixin', 'ShardMixin', )
+__all__ = ('StrategyPkMixin', 'SpecificDatabaseMixin', 'BaseShardMixin', 'ShardMixin', 'IsolatedShardMixin', )
 
 
 class StrategyPkMixin(models.Field):

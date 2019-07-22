@@ -4,7 +4,7 @@ from typing import Optional
 from django.apps import apps
 from django.conf import settings
 
-from shard.constants import DATABASE_CONFIG_SHARD_GROUP, DEFAULT_DATABASE
+from shard.constants import DATABASE_CONFIG_SHARD_GROUP
 from shard.mixins import IsolatedShardMixin, ShardMixin
 from shard.routers.base import BaseReplicationRouter
 from shard.utils.shard import get_shard_by_instance, get_shard_by_shard_key_and_shard_group
@@ -14,17 +14,18 @@ from shard_static.mixins import ShardStaticMixin
 
 class ShardStaticRouter(BaseReplicationRouter):
     def allow_relation(self, obj1, obj2, **hints):
-        super_allow_relation = super().allow_relation(obj1, obj2, **hints)
-        if super_allow_relation is not None:
-            return super_allow_relation
-
         # Don't link IsolatedShardMixin and other model.
         # IsolatedShardMixin is isolation each shards.
         if isinstance(obj1, IsolatedShardMixin) or isinstance(obj2, IsolatedShardMixin):
             return False
 
         if isinstance(obj1, (ShardMixin, ShardStaticMixin)) and isinstance(obj2, (ShardMixin, ShardStaticMixin)):
-            # obj1 and obj2 are for shard
+            # if obj1 and obj2 are shard static model, all config of them have to be same.
+            if isinstance(obj1, ShardStaticMixin) and isinstance(obj2, ShardStaticMixin):
+                return obj1.shard_group == obj2.shard_group and obj1.source_db == obj2.source_db and obj1.transmit == obj2.transmit
+            elif isinstance(obj1, ShardMixin) and isinstance(obj2, ShardMixin):
+                return super().allow_relation(obj1, obj2, **hints)
+
             return obj1.shard_group == obj2.shard_group
 
         if (isinstance(obj1, (ShardMixin, ShardStaticMixin)) and not isinstance(obj2, (ShardMixin, ShardStaticMixin))) or \
@@ -65,13 +66,18 @@ class ShardStaticRouter(BaseReplicationRouter):
             return None
 
         if issubclass(model, ShardStaticMixin):
-            if model.transmit and db == DEFAULT_DATABASE:
+            if model.transmit and db == model.source_db:
                 return True
 
         return shard_group_for_db == model.shard_group
 
     def _get_master_database(self, model, **hints) -> Optional[str]:
-        if not issubclass(model, ShardMixin):
+        if not issubclass(model, (ShardMixin, ShardStaticMixin)):
+            return None
+
+        if issubclass(model, ShardStaticMixin):
+            if model.transmit:
+                return model.source_db
             return None
 
         shard = None
