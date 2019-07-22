@@ -1,5 +1,9 @@
 Changelog
 =========
+0.1.3 (Jul 22nd 2019)
+-------------------
+- Add a logic for source database of shard static
+
 0.1.2 (Apr 19th 2019)
 -------------------
 - Support django 2.2
