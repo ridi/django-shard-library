@@ -1,6 +1,6 @@
 -r base.txt
 
-pylint==1.8.1
+pylint==4.0.9
 flake8==3.5.0
 
 django-fake-model==0.1.4
